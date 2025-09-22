@@ -1,7 +1,8 @@
 import start
-from PyQt6.QtWidgets import QWidget, QLabel, QPushButton, QFrame, QVBoxLayout
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QPainter
+import webbrowser
+from PyQt6.QtWidgets import QWidget, QLabel, QPushButton, QFrame, QVBoxLayout, QLabel, QVBoxLayout
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QIcon
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -17,9 +18,6 @@ class MainWindow(QWidget):
         self.show()
 
     def regMainWin(self):
-        window = QWidget()
-        layout = QVBoxLayout()
-
         font_id = QFontDatabase.addApplicationFont("Font/MTSCompact-Medium.ttf")
         font_families = QFontDatabase.applicationFontFamilies(font_id)
         font_Medium = QFont(font_families[0], 28)
@@ -48,7 +46,11 @@ class MainWindow(QWidget):
         button_entrance = QPushButton("Войти в учетную запись", self)
         sub_label_text.setFont(font_Regular)
         button_entrance.move(350, 300)
-
+        icon_path = "ProjectImage/regMainWin/entrance.svg"
+        button_entrance.setIcon(QIcon(icon_path))
+        button_entrance.setIconSize(button_entrance.sizeHint())
+        button_entrance.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        button_entrance.setCursor(Qt.CursorShape(13))
         button_entrance.setStyleSheet("""
             QPushButton {
                 background-color: none;
@@ -91,6 +93,10 @@ class MainWindow(QWidget):
         button_reg = QPushButton("Зарегистрировать в учетную запись", self)
         sub_label_text.setFont(font_Regular)
         button_reg.move(350, 425)
+        button_reg.setIcon(QIcon(icon_path))
+        button_reg.setIconSize(button_reg.sizeHint())
+        button_reg.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        button_reg.setCursor(Qt.CursorShape(13))
         button_reg.setStyleSheet("""
             QPushButton {
                 background-color: none;
@@ -106,7 +112,27 @@ class MainWindow(QWidget):
                 font-weight: 500;
                 cursor: pointer;
             }
-            QPushButton:hover {
+        """)
+
+        button_question = QPushButton("Есть вопросы?", self)
+        button_question.setFont(font_Regular)
+        button_question.move(1020, 630)
+        path_question = "ProjectImage/regMainWin/question.svg"
+        button_question.setIcon(QIcon(path_question))
+        button_question.setIconSize(QSize(18, 18))
+        button_question.setCursor(Qt.CursorShape(13))
+        button_question.setStyleSheet("""
+            QPushButton {
                 background-color: none;
+                border: none;
+                padding: 10px 15px;
             }
         """)
+        button_question.clicked.connect(self.on_button_question_clicked)
+
+    def on_button_question_clicked(self):
+        url = "https://www.figma.com/design/9FQokcbqpZ7rOG564hjqS8/Untitled?node-id=0-1&p=f&t=1IWjCKa4XLJBQiXs-0"
+        webbrowser.open(url)
+        print(f"click button_question"
+              f"\nCONNECT: {url}")
+
