@@ -1,15 +1,36 @@
 import start
+import sys
 import webbrowser
-from PyQt6.QtWidgets import QWidget, QLabel, QPushButton, QFrame, QVBoxLayout, QLabel, QVBoxLayout
+from PyQt6.QtWidgets import QWidget, QLabel, QPushButton, QFrame, QVBoxLayout, QLabel, QVBoxLayout, QApplication
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QIcon
+
+class RegWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Регистрация")
+        self.setGeometry(500, 110, start.WMaxReg, start.HMaxReg)
+        self.setStyleSheet("background-color: #1C1C1C;")
+        self.setFixedSize(start.WMaxReg, start.HMaxReg)
+        self.regWindowLabel()
+        self.show()
+
+    def regWindowLabel(self):
+        pass
+
+class EntranceWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Вход")
+        self.setGeometry(500, 110, start.WMaxReg, start.HMaxReg)
+        self.setStyleSheet("background-color: #1C1C1C;")
+        self.setFixedSize(start.WMaxReg, start.HMaxReg)
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.mainWin()
-
-    def mainWin(self):
+        self.reg_window = None
+        self.button_entrance = None
         self.setWindowTitle("Indust - Инвентаризация склада магазинов")
         self.setGeometry(175, 75, start.WMax, start.HMax)
         self.setStyleSheet("background-color: #1C1C1C;")
@@ -18,14 +39,6 @@ class MainWindow(QWidget):
         self.show()
 
     def regMainWin(self):
-        font_id = QFontDatabase.addApplicationFont("Font/MTSCompact-Medium.ttf")
-        font_families = QFontDatabase.applicationFontFamilies(font_id)
-        font_Medium = QFont(font_families[0], 28)
-
-        font_id = QFontDatabase.addApplicationFont("Font/MTSCompact-Regular.ttf")
-        font_families = QFontDatabase.applicationFontFamilies(font_id)
-        font_Regular = QFont(font_families[0], 12)
-
         image_logo = "ProjectImage/regMainWin/Indust_logo-png.png"
         with open(image_logo):
             image_logo_label = QLabel(self)
@@ -36,15 +49,15 @@ class MainWindow(QWidget):
             image_logo_label.setPixmap(scaled_logo)
 
         head_label_text = QLabel("Вход в учетную запись", self)
-        head_label_text.setFont(font_Medium)
+        head_label_text.setFont(start.font_Medium())
         head_label_text.move(348, 175)
 
         sub_label_text = QLabel("Войдите в сою учетную запись для начала работы или если ее нет, \nсоздайте ее", self)
-        sub_label_text.setFont(font_Regular)
+        sub_label_text.setFont(start.font_Regular())
         sub_label_text.move(350, 235)
 
         button_entrance = QPushButton("Войти в учетную запись", self)
-        sub_label_text.setFont(font_Regular)
+        sub_label_text.setFont(start.font_Regular())
         button_entrance.move(350, 300)
         icon_path = "ProjectImage/regMainWin/entrance.svg"
         button_entrance.setIcon(QIcon(icon_path))
@@ -80,7 +93,7 @@ class MainWindow(QWidget):
         line.setFixedWidth(472)
 
         or_label = QLabel("или", self)
-        or_label.setFont(font_Regular)
+        or_label.setFont(start.font_Regular())
         or_label.move(550, 365)
         or_label.setStyleSheet("""
             QLabel {
@@ -91,7 +104,7 @@ class MainWindow(QWidget):
         """)
 
         button_reg = QPushButton("Зарегистрировать в учетную запись", self)
-        sub_label_text.setFont(font_Regular)
+        sub_label_text.setFont(start.font_Regular())
         button_reg.move(350, 425)
         button_reg.setIcon(QIcon(icon_path))
         button_reg.setIconSize(button_reg.sizeHint())
@@ -115,7 +128,7 @@ class MainWindow(QWidget):
         """)
 
         button_question = QPushButton("Есть вопросы?", self)
-        button_question.setFont(font_Regular)
+        button_question.setFont(start.font_Regular())
         button_question.move(1020, 630)
         path_question = "ProjectImage/regMainWin/question.svg"
         button_question.setIcon(QIcon(path_question))
@@ -128,11 +141,24 @@ class MainWindow(QWidget):
                 padding: 10px 15px;
             }
         """)
+        button_entrance.clicked.connect(self.on_button_entrance_clicked)
         button_question.clicked.connect(self.on_button_question_clicked)
+        button_reg.clicked.connect(self.on_button_reg_clicked)
 
     def on_button_question_clicked(self):
-        url = "https://www.figma.com/design/9FQokcbqpZ7rOG564hjqS8/Untitled?node-id=0-1&p=f&t=1IWjCKa4XLJBQiXs-0"
+        url = "192.168.00.00"
         webbrowser.open(url)
         print(f"click button_question"
               f"\nCONNECT: {url}")
 
+    def on_button_reg_clicked(self):
+        if self.reg_window is None:
+            self.reg_window = RegWindow()
+        self.reg_window.show()
+        print("click button_reg")
+
+    def on_button_entrance_clicked(self):
+        if self.button_entrance is None:
+            self.button_entrance = EntranceWindow()
+        self.button_entrance.show()
+        print("click button_entrance")
