@@ -1,14 +1,19 @@
-from PyQt6.QtWidgets import QApplication, QPushButton, QWidget, QVBoxLayout
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit
 
 app = QApplication([])
+
 window = QWidget()
+window.setWindowTitle("Поле для ввода")
 layout = QVBoxLayout()
 
-button = QPushButton("Наведи на меня")
-button.setCursor(Qt.CursorShape(13)) # Правильный способ
+# Создаем поле для ввода
+line_edit = QLineEdit()
+line_edit.setPlaceholderText("Введите текст здесь")
 
-layout.addWidget(button)
+# Добавляем поле в макет
+layout.addWidget(line_edit)
+
 window.setLayout(layout)
 window.show()
+
 app.exec()

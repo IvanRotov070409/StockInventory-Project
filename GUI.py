@@ -1,30 +1,9 @@
 import start
 import sys
 import webbrowser
-from PyQt6.QtWidgets import QWidget, QLabel, QPushButton, QFrame, QVBoxLayout, QLabel, QVBoxLayout, QApplication
+from PyQt6.QtWidgets import QWidget, QPushButton, QFrame, QLabel, QLineEdit, QCheckBox
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QIcon
-
-class RegWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Регистрация")
-        self.setGeometry(500, 110, start.WMaxReg, start.HMaxReg)
-        self.setStyleSheet("background-color: #1C1C1C;")
-        self.setFixedSize(start.WMaxReg, start.HMaxReg)
-        self.regWindowLabel()
-        self.show()
-
-    def regWindowLabel(self):
-        pass
-
-class EntranceWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Вход")
-        self.setGeometry(500, 110, start.WMaxReg, start.HMaxReg)
-        self.setStyleSheet("background-color: #1C1C1C;")
-        self.setFixedSize(start.WMaxReg, start.HMaxReg)
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -162,3 +141,182 @@ class MainWindow(QWidget):
             self.button_entrance = EntranceWindow()
         self.button_entrance.show()
         print("click button_entrance")
+
+
+class RegWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Регистрация")
+        self.setGeometry(500, 110, start.WMaxReg, start.HMaxReg)
+        self.setStyleSheet("background-color: #1C1C1C;")
+        self.setFixedSize(start.WMaxReg, start.HMaxReg)
+        self.regWindowLabel()
+        self.show()
+
+    def regWindowLabel(self):
+        head_text_reg = QLabel("Регистрация", self)
+        head_text_reg.setFont(start.font_Medium())
+        head_text_reg.move(125, 70)
+
+        self.sub_text_reg = QLabel("Пройдите регистрацию и начните вести\nучет товаров прямо сейчас!", self)
+        self.sub_text_reg.setFont(start.font_Regular())
+        self.sub_text_reg.move(125, 140)
+
+        self.login_input = QLineEdit(self)
+        self.login_input.setPlaceholderText("Emil")
+        self.login_input.setGeometry(125, 210, 270, 50)
+        self.login_input.setFont(start.font_Medium())
+        self.login_input.setStyleSheet("""
+            QLineEdit {
+                background-color: #1C1C1C;
+                color: white;
+                border: 1px solid white;
+                border-top: 0px;
+                border-left: 0px;
+                border-right: 0px;
+                font-size: 16px;
+            }
+        """)
+
+        self.password_input = QLineEdit(self)
+        self.password_input.setPlaceholderText("Пароль")
+        self.password_input.setGeometry(125, 300, 270, 50)
+        self.password_input.setFont(start.font_Medium())
+        self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
+        self.password_input.setStyleSheet("""
+            QLineEdit {
+                background-color: #1C1C1C;
+                color: white;
+                border: 1px solid white;
+                border-top: 0px;
+                border-left: 0px;
+                border-right: 0px;
+                font-size: 16px;
+            }
+        """)
+
+        self.repeat_password_input = QLineEdit(self)
+        self.repeat_password_input.setPlaceholderText("Повторите пароль")
+        self.repeat_password_input.setGeometry(125, 400, 270, 50)
+        self.repeat_password_input.setFont(start.font_Medium())
+        self.repeat_password_input.setEchoMode(QLineEdit.EchoMode.Password)
+        self.repeat_password_input.setStyleSheet("""
+            QLineEdit {
+                background-color: #1C1C1C;
+                color: white;
+                border: 1px solid white;
+                border-top: 0px;
+                border-left: 0px;
+                border-right: 0px;
+                font-size: 16px;
+            }
+        """)
+
+        button_reg = QPushButton("Регистрация", self)
+        button_reg.setFont(start.font_Regular())
+        button_reg.setGeometry(170, 530, 180, 40)
+        button_reg.setFont(start.font_Regular())
+        button_reg.setCursor(Qt.CursorShape(13))
+        button_reg.setStyleSheet("""
+            QPushButton {
+                background-color: #fff;
+                color: rgb(15,15,15);
+                text-align: center;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 20px;
+            }
+        """)
+
+        self.checkbox = QCheckBox("Получать рассылки и рекламу", self)
+        self.checkbox.setFont(start.font_Regular())
+        self.checkbox.move(145, 480)
+        self.checkbox.setCursor(Qt.CursorShape(13))
+        self.checkbox.setStyleSheet("""
+            QCheckBox {
+                color: white;
+                font-size: 14px;
+                padding: 5px;
+                color: rgba(255, 255, 255, 0.5);
+            }
+        """)
+class EntranceWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Вход")
+        self.setGeometry(500, 110, start.WMaxReg, start.HMaxReg)
+        self.setStyleSheet("background-color: #1C1C1C;")
+        self.setFixedSize(start.WMaxReg, start.HMaxReg)
+        self.entranceWindowLabel()
+        self.show()
+
+    def entranceWindowLabel(self):
+        head_text_entrance = QLabel("Вход", self)
+        head_text_entrance.setFont(start.font_Medium())
+        head_text_entrance.move(125, 120)
+
+        self.sub_text_entrance = QLabel("Войдите в сою учетную запись для\nначала работы ", self)
+        self.sub_text_entrance.setFont(start.font_Regular())
+        self.sub_text_entrance.move(125, 190)
+
+        self.login_input_entrance = QLineEdit(self)
+        self.login_input_entrance.setPlaceholderText("Emil")
+        self.login_input_entrance.setGeometry(125, 260, 270, 50)
+        self.login_input_entrance.setFont(start.font_Medium())
+        self.login_input_entrance.setStyleSheet("""
+                    QLineEdit {
+                        background-color: #1C1C1C;
+                        color: white;
+                        border: 1px solid white;
+                        border-top: 0px;
+                        border-left: 0px;
+                        border-right: 0px;
+                        font-size: 16px;
+                    }
+                """)
+
+        self.password_input_entrance = QLineEdit(self)
+        self.password_input_entrance.setPlaceholderText("Пароль")
+        self.password_input_entrance.setGeometry(125, 350, 270, 50)
+        self.password_input_entrance.setFont(start.font_Medium())
+        self.password_input_entrance.setEchoMode(QLineEdit.EchoMode.Password)
+        self.password_input_entrance.setStyleSheet("""
+                    QLineEdit {
+                        background-color: #1C1C1C;
+                        color: white;
+                        border: 1px solid white;
+                        border-top: 0px;
+                        border-left: 0px;
+                        border-right: 0px;
+                        font-size: 16px;
+                    }
+                """)
+
+        button_entrance = QPushButton("Вход", self)
+        button_entrance.setFont(start.font_Regular())
+        button_entrance.setGeometry(170, 480, 180, 40)
+        button_entrance.setFont(start.font_Regular())
+        button_entrance.setCursor(Qt.CursorShape(13))
+        button_entrance.setStyleSheet("""
+                    QPushButton {
+                        background-color: #fff;
+                        color: rgb(15,15,15);
+                        text-align: center;
+                        border: none;
+                        padding: 10px 15px;
+                        border-radius: 20px;
+                    }
+                """)
+
+        self.checkbox_comp = QCheckBox("Чужой компьютер", self)
+        self.checkbox_comp.setFont(start.font_Regular())
+        self.checkbox_comp.move(180, 430)
+        self.checkbox_comp.setCursor(Qt.CursorShape(13))
+        self.checkbox_comp.setStyleSheet("""
+                    QCheckBox {
+                        color: white;
+                        font-size: 14px;
+                        padding: 5px;
+                        color: rgba(255, 255, 255, 0.5);
+                    }
+                """)
