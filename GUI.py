@@ -1,3 +1,4 @@
+import commit_user
 import start
 import webbrowser
 from PyQt6.QtWidgets import QWidget, QPushButton, QFrame, QLabel, QLineEdit, QCheckBox, QMessageBox
@@ -194,6 +195,23 @@ class RegWindow(QWidget):
         if password == repeat_password and "@" in login and "." in login and (password != "" and repeat_password != "" and login != "") and len(password) >= 8:
             print(f"Login: {login}")
             print(f"Password: {len(password)*'*'}")
+            user_mes = commit_user.addUserDB(login, password)
+            if user_mes == True:
+                print(f"USER: {login} IS REGISTER\n")
+                msg_box = QMessageBox()
+                msg_box.setIcon(QMessageBox.Icon.Information)
+                msg_box.setText("Регистрация прошла успешно")
+                msg_box.setWindowTitle("Оповещение")
+                msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+                msg_box.exec()
+            else:
+                print(f"USER: {login} IS NOT REGISTER\n")
+                msg_box = QMessageBox()
+                msg_box.setIcon(QMessageBox.Icon.Critical)
+                msg_box.setText("Пользователь уже существует")
+                msg_box.setWindowTitle("Оповещение")
+                msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+                msg_box.exec()
         else:
             print("ERROR: incorrect data entry")
             msg_box = QMessageBox()
