@@ -1,4 +1,4 @@
-import commit_user
+#import commit_user
 import login_user
 import start
 import webbrowser
@@ -212,10 +212,10 @@ class RegWindow(QWidget):
             print(f"Login: {login}")
             print(f"User-name: {user_name}")
             print(f"Password: {len(password)*'*'}")
-            user_mes = commit_user.addUserDB(login, user_name, password)
+            user_mes = login_user.addUserDB(login, user_name, password)
             if user_mes == True:
                 print(f"USER: {login} IS REGISTER\n")
-
+                start.assetsPathAppend()
                 msg_box = QMessageBox()
                 msg_box.setIcon(QMessageBox.Icon.Information)
                 msg_box.setText("Регистрация прошла успешно")
@@ -334,25 +334,17 @@ class EntranceWindow(QWidget):
             msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
             result = msg_box.exec()
 
+            user_data = {
+                "name": login_user.getUserName(login),
+                "email": login
+            }
+            with open(f'assets/user.json', 'w') as f:
+                json.dump(user_data, f, indent=4, ensure_ascii=False)
+
             if result == QMessageBox.StandardButton.Ok:
                 self.entranceWindowLabel()
                 self.close()
-
-                conn = sqlite3.connect("DataBase/Base/RegisterUserDataBase.db")
-                c = conn.cursor()
-                c.execute("SELECT user_name FROM users WHERE login = ?", (login,))
-                res = c.fetchone()
-                user_name = res[0]
-                print("User name:", user_name)
-
-                user_data = {
-                    "name": user_name,
-                    "email": login
-                }
-                with open(f'assets/user.json', 'w') as f:
-                    json.dump(user_data, f, indent=4, ensure_ascii=False)
-
-                conn.close()
+                start.assetsPathAppend()
         else:
             msg_box = QMessageBox()
             msg_box.setIcon(QMessageBox.Icon.Warning)

@@ -1,5 +1,6 @@
 import sys
 import GUI
+import os
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QFont, QFontDatabase
 
@@ -9,6 +10,13 @@ HMax = 700
 
 WMaxReg = 525
 HMaxReg = 650
+
+def assetsPathAppend():
+    try:
+        path = './assets'
+        os.mkdir(path)
+    except os.error as error:
+        print(error)
 
 def font_Medium(x):
     font_id = QFontDatabase.addApplicationFont("Font/MTSCompact-Medium.ttf")
