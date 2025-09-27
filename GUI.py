@@ -1,6 +1,10 @@
 import commit_user
+import login_user
 import start
 import webbrowser
+import json
+import sqlite3
+import os
 from PyQt6.QtWidgets import QWidget, QPushButton, QFrame, QLabel, QLineEdit, QCheckBox, QMessageBox
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPixmap, QIcon
@@ -123,39 +127,50 @@ class RegWindow(QWidget):
     def regWindowLabel(self):
         head_text_reg = QLabel("Регистрация", self)
         head_text_reg.setFont(start.font_Medium(28))
-        head_text_reg.move(125, 70)
+        head_text_reg.move(95, 70)
 
         password_warn_text = QLabel("Не менее 8 символов", self)
         password_warn_text.setFont(start.font_Regular(10))
-        password_warn_text.move(125, 360)
+        password_warn_text.move(95, 460)
         password_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
 
-        password_warn_text = QLabel("Не менее 8 символов", self)
-        password_warn_text.setFont(start.font_Regular(10))
-        password_warn_text.move(125, 460)
-        password_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+        login_warn_text = QLabel("email@mail.ru", self)
+        login_warn_text.setFont(start.font_Regular(10))
+        login_warn_text.move(95, 270)
+        login_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+
+        user_name_warn_text = QLabel("Иванов Иван", self)
+        user_name_warn_text.setFont(start.font_Regular(10))
+        user_name_warn_text.move(95, 360)
+        user_name_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
 
         self.sub_text_reg = QLabel("Пройдите регистрацию и начните вести\nучет товаров прямо сейчас!", self)
         self.sub_text_reg.setFont(start.font_Regular(12))
-        self.sub_text_reg.move(125, 140)
+        self.sub_text_reg.move(95, 140)
 
         self.login_input = QLineEdit(self)
         self.login_input.setPlaceholderText("Emil")
-        self.login_input.setGeometry(125, 210, 270, 50)
-        self.login_input.setFont(start.font_Medium(28))
+        self.login_input.setGeometry(95, 210, 320, 50)
+        self.login_input.setFont(start.font_Medium(24))
         self.login_input.setStyleSheet(start.input_style)
+
+        self.user_name_input = QLineEdit(self)
+        self.user_name_input.setPlaceholderText("Фамилия и Имя")
+        self.user_name_input.setGeometry(95, 300, 320, 50)
+        self.user_name_input.setFont(start.font_Medium(24))
+        self.user_name_input.setStyleSheet(start.input_style)
 
         self.password_input = QLineEdit(self)
         self.password_input.setPlaceholderText("Пароль")
-        self.password_input.setGeometry(125, 300, 270, 50)
-        self.password_input.setFont(start.font_Medium(28))
+        self.password_input.setGeometry(95, 400, 135, 50)
+        self.password_input.setFont(start.font_Medium(20))
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.password_input.setStyleSheet(start.input_style)
 
         self.repeat_password_input = QLineEdit(self)
         self.repeat_password_input.setPlaceholderText("Повторите пароль")
-        self.repeat_password_input.setGeometry(125, 400, 270, 50)
-        self.repeat_password_input.setFont(start.font_Medium(28))
+        self.repeat_password_input.setGeometry(280, 400, 135, 50)
+        self.repeat_password_input.setFont(start.font_Medium(20))
         self.repeat_password_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.repeat_password_input.setStyleSheet(start.input_style)
 
@@ -191,19 +206,34 @@ class RegWindow(QWidget):
     def on_button_reg_win_clicked(self):
         login = self.login_input.text()
         password = self.password_input.text()
+        user_name = self.user_name_input.text()
         repeat_password = self.repeat_password_input.text()
-        if password == repeat_password and "@" in login and "." in login and (password != "" and repeat_password != "" and login != "") and len(password) >= 8:
+        if password == repeat_password and "@" in login and "." in login and (password != "" and repeat_password != "" and login != "" and user_name!="") and len(password) >= 8:
             print(f"Login: {login}")
+            print(f"User-name: {user_name}")
             print(f"Password: {len(password)*'*'}")
-            user_mes = commit_user.addUserDB(login, password)
+            user_mes = commit_user.addUserDB(login, user_name, password)
             if user_mes == True:
                 print(f"USER: {login} IS REGISTER\n")
+
                 msg_box = QMessageBox()
                 msg_box.setIcon(QMessageBox.Icon.Information)
                 msg_box.setText("Регистрация прошла успешно")
                 msg_box.setWindowTitle("Оповещение")
                 msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
-                msg_box.exec()
+                result = msg_box.exec()
+
+                user_data = {
+                    "name": user_name,
+                    "email": login
+                }
+                with open(f'assets/user.json', 'w') as f:
+                    json.dump(user_data, f, indent=4, ensure_ascii=False)
+
+                if result == QMessageBox.StandardButton.Ok:
+                    self.regWindowLabel()
+                    self.close()
+
             else:
                 print(f"USER: {login} IS NOT REGISTER\n")
                 msg_box = QMessageBox()
@@ -215,8 +245,8 @@ class RegWindow(QWidget):
         else:
             print("ERROR: incorrect data entry")
             msg_box = QMessageBox()
-            msg_box.setIcon(QMessageBox.Icon.Information)
-            msg_box.setText("Неверно указан Emil или пароль")
+            msg_box.setIcon(QMessageBox.Icon.Warning)
+            msg_box.setText("Неверно указаны данные или пароль")
             msg_box.setWindowTitle("Ошибка")
             msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
             msg_box.exec()
@@ -242,6 +272,11 @@ class EntranceWindow(QWidget):
         self.sub_text_entrance.setFont(start.font_Regular(12))
         self.sub_text_entrance.move(125, 190)
 
+        login_warn_text = QLabel("email@mail.ru", self)
+        login_warn_text.setFont(start.font_Regular(10))
+        login_warn_text.move(125, 320)
+        login_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+
         self.login_input_entrance = QLineEdit(self)
         self.login_input_entrance.setPlaceholderText("Emil")
         self.login_input_entrance.setGeometry(125, 260, 270, 50)
@@ -255,12 +290,12 @@ class EntranceWindow(QWidget):
         self.password_input_entrance.setEchoMode(QLineEdit.EchoMode.Password)
         self.password_input_entrance.setStyleSheet(start.input_style)
 
-        button_entrance = QPushButton("Вход", self)
-        button_entrance.setFont(start.font_Regular(12))
-        button_entrance.setGeometry(170, 480, 180, 40)
-        button_entrance.setFont(start.font_Regular(12))
-        button_entrance.setCursor(Qt.CursorShape(13))
-        button_entrance.setStyleSheet("""
+        self.button_entrance = QPushButton("Вход", self)
+        self.button_entrance.setFont(start.font_Regular(12))
+        self.button_entrance.setGeometry(170, 480, 180, 40)
+        self.button_entrance.setFont(start.font_Regular(12))
+        self.button_entrance.setCursor(Qt.CursorShape(13))
+        self.button_entrance.setStyleSheet("""
                     QPushButton {
                         background-color: #fff;
                         color: rgb(15,15,15);
@@ -283,3 +318,47 @@ class EntranceWindow(QWidget):
                         color: rgba(255, 255, 255, 0.5);
                     }
                 """)
+        self.button_entrance.clicked.connect(self.on_button_entrance_win_clicked)
+
+    def on_button_entrance_win_clicked(self):
+        login = self.login_input_entrance.text()
+        password = self.password_input_entrance.text()
+        login_user.loginUserDB(login, password)
+        print(login_user.loginUserDB(login, password))
+        if login_user.loginUserDB(login, password) == True:
+            print(f"USER: {login} IS ENTRANCE")
+            msg_box = QMessageBox()
+            msg_box.setIcon(QMessageBox.Icon.Information)
+            msg_box.setText("Успешный вход")
+            msg_box.setWindowTitle("Оповещение")
+            msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+            result = msg_box.exec()
+
+            if result == QMessageBox.StandardButton.Ok:
+                self.entranceWindowLabel()
+                self.close()
+
+                conn = sqlite3.connect("DataBase/Base/RegisterUserDataBase.db")
+                c = conn.cursor()
+                c.execute("SELECT user_name FROM users WHERE login = ?", (login,))
+                res = c.fetchone()
+                user_name = res[0]
+                print("User name:", user_name)
+
+                user_data = {
+                    "name": user_name,
+                    "email": login
+                }
+                with open(f'assets/user.json', 'w') as f:
+                    json.dump(user_data, f, indent=4, ensure_ascii=False)
+
+                conn.close()
+        else:
+            msg_box = QMessageBox()
+            msg_box.setIcon(QMessageBox.Icon.Warning)
+            msg_box.setText("Пользователь не найден")
+            msg_box.setWindowTitle("Ошибка")
+            msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+            msg_box.exec()
+            self.login_input_entrance.clear()
+            self.password_input_entrance.clear()

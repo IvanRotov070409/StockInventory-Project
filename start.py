@@ -54,7 +54,7 @@ main_window_but_style = """
     }
 """
 
-#Запуск приложения
+
 app = QApplication(sys.argv)
 window = GUI.MainWindow()
 sys.exit(app.exec())
