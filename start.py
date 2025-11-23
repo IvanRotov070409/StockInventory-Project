@@ -1,7 +1,7 @@
 import sys
 import GUI
 import os
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication, QWidget
 from PyQt6.QtGui import QFont, QFontDatabase
 
 #Константы в виде размера окон
@@ -29,6 +29,11 @@ def font_Regular(x):
     font_families = QFontDatabase.applicationFontFamilies(font_id)
     font_Regular = QFont(font_families[0], x)
     return font_Regular
+
+
+def clear_window_widgets(window: QWidget):
+    for child in window.findChildren(QWidget):
+        child.deleteLater()
 
 input_style = """
     QLineEdit {

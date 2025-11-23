@@ -5,6 +5,7 @@ import webbrowser
 import json
 import sqlite3
 import os
+import re
 from PyQt6.QtWidgets import QWidget, QPushButton, QFrame, QLabel, QLineEdit, QCheckBox, QMessageBox
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPixmap, QIcon
@@ -14,7 +15,8 @@ class MainWindow(QWidget):
         super().__init__()
         self.reg_window = None
         self.button_entrance = None
-        self.setWindowTitle("Indust - Инвентаризация склада магазинов")
+        self.setWindowTitle("StockBalance - Инвентаризация склада магазинов")
+        self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
         self.setGeometry(175, 75, start.WMax, start.HMax)
         self.setStyleSheet("background-color: #1C1C1C;")
         self.setFixedSize(start.WMax, start.HMax)
@@ -27,7 +29,7 @@ class MainWindow(QWidget):
             image_logo_label = QLabel(self)
             image_logo_label.move(25, 25)
             image_label_pix = QPixmap(image_logo)
-            scaled_logo = image_label_pix.scaled(125, 50, Qt.AspectRatioMode.KeepAspectRatio,
+            scaled_logo = image_label_pix.scaled(200, 75, Qt.AspectRatioMode.KeepAspectRatio,
                                           Qt.TransformationMode.SmoothTransformation)
             image_logo_label.setPixmap(scaled_logo)
 
@@ -209,39 +211,55 @@ class RegWindow(QWidget):
         user_name = self.user_name_input.text()
         repeat_password = self.repeat_password_input.text()
         if password == repeat_password and "@" in login and "." in login and (password != "" and repeat_password != "" and login != "" and user_name!="") and len(password) >= 8:
-            print(f"Login: {login}")
-            print(f"User-name: {user_name}")
-            print(f"Password: {len(password)*'*'}")
-            user_mes = login_user.addUserDB(login, user_name, password)
-            if user_mes == True:
-                print(f"USER: {login} IS REGISTER\n")
-                start.assetsPathAppend()
-                msg_box = QMessageBox()
-                msg_box.setIcon(QMessageBox.Icon.Information)
-                msg_box.setText("Регистрация прошла успешно")
-                msg_box.setWindowTitle("Оповещение")
-                msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
-                result = msg_box.exec()
-
-                user_data = {
-                    "name": user_name,
-                    "email": login
-                }
-                with open(f'assets/user.json', 'w') as f:
-                    json.dump(user_data, f, indent=4, ensure_ascii=False)
-
-                if result == QMessageBox.StandardButton.Ok:
-                    self.regWindowLabel()
-                    self.close()
-
-            else:
+            if re.search(r'[а-яА-Я]', password) or re.search(r'[а-яА-Я]', password):
                 print(f"USER: {login} IS NOT REGISTER\n")
                 msg_box = QMessageBox()
                 msg_box.setIcon(QMessageBox.Icon.Critical)
-                msg_box.setText("Пользователь уже существует")
+                msg_box.setText("Пароль или почта не должен содержать кириллицу")
                 msg_box.setWindowTitle("Оповещение")
                 msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
                 msg_box.exec()
+                self.password_input.clear()
+                self.repeat_password_input.clear()
+            else:
+                print(f"Login: {login}")
+                print(f"User-name: {user_name}")
+                print(f"Password: {len(password)*'*'}")
+                user_mes = login_user.addUserDB(login, user_name, password)
+                if user_mes == True:
+                    print(f"USER: {login} IS REGISTER\n")
+                    start.assetsPathAppend()
+                    msg_box = QMessageBox()
+                    msg_box.setIcon(QMessageBox.Icon.Information)
+                    msg_box.setText("Регистрация прошла успешно")
+                    msg_box.setWindowTitle("Оповещение")
+                    msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+                    result = msg_box.exec()
+
+                    user_data = {
+                        "name": user_name,
+                        "email": login
+                    }
+                    with open(f'assets/user.json', 'w') as f:
+                        json.dump(user_data, f, indent=4, ensure_ascii=False)
+
+                    if result == QMessageBox.StandardButton.Ok:
+                        self.regWindowLabel()
+                        self.close()
+
+                        self.main_window = MainMenuWindow()
+                        self.main_window.show()
+
+                        # Закройте окно регистрации
+                        self.close()
+                else:
+                    print(f"USER: {login} IS NOT REGISTER\n")
+                    msg_box = QMessageBox()
+                    msg_box.setIcon(QMessageBox.Icon.Critical)
+                    msg_box.setText("Пользователь уже существует")
+                    msg_box.setWindowTitle("Оповещение")
+                    msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+                    msg_box.exec()
         else:
             print("ERROR: incorrect data entry")
             msg_box = QMessageBox()
@@ -333,7 +351,7 @@ class EntranceWindow(QWidget):
             msg_box.setWindowTitle("Оповещение")
             msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
             result = msg_box.exec()
-
+            start.clear_window_widgets(QWidget)
             user_data = {
                 "name": login_user.getUserName(login),
                 "email": login
@@ -354,3 +372,12 @@ class EntranceWindow(QWidget):
             msg_box.exec()
             self.login_input_entrance.clear()
             self.password_input_entrance.clear()
+
+class MainMenuWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Главное меню")
+        self.setGeometry(300, 200, 800, 600)
+        label = QLabel("Добро пожаловать в главное меню!", self)
+        label.move(50, 50)
+        self.show()
