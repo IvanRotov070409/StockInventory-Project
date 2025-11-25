@@ -1,28 +1,32 @@
-#import commit_user
 import login_user
 import start
 import webbrowser
 import json
-import sqlite3
 import os
 import re
 from PyQt6.QtWidgets import QWidget, QPushButton, QFrame, QLabel, QLineEdit, QCheckBox, QMessageBox
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPixmap, QIcon
 
-class MainWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.reg_window = None
-        self.button_entrance = None
-        self.setWindowTitle("StockBalance - Инвентаризация склада магазинов")
-        self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
-        self.setGeometry(175, 75, start.WMax, start.HMax)
-        self.setStyleSheet("background-color: #1C1C1C;")
-        self.setFixedSize(start.WMax, start.HMax)
-        self.regMainWin()
-        self.show()
 
+class MainWindow(QWidget):
+
+    if os.path.exists("assets/user.json") == False:
+        def __init__(self):
+            super().__init__()
+            self.reg_window = None
+            self.button_entrance = None
+            self.setWindowTitle("StockBalance - Инвентаризация склада магазинов")
+            self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
+            self.setGeometry(175, 75, start.WMax, start.HMax)
+            self.setStyleSheet("background-color: #1C1C1C;")
+            self.setFixedSize(start.WMax, start.HMax)
+            self.regMainWin()
+            self.show()
+    else:
+        def __init__(self):
+            self.main_window = MainMenuWindow()
+            self.main_window.show()
     def regMainWin(self):
         image_logo = "ProjectImage/regMainWin/Indust_logo-png.png"
         with open(image_logo):
@@ -105,20 +109,22 @@ class MainWindow(QWidget):
 
     def on_button_reg_clicked(self):
         if self.reg_window is None:
-            self.reg_window = RegWindow()
+            self.reg_window = RegWindow(reg_window=self.reg_window, main_window=self)
         self.reg_window.show()
         print("click button_reg")
 
     def on_button_entrance_clicked(self):
         if self.button_entrance is None:
-            self.button_entrance = EntranceWindow()
+            self.button_entrance = EntranceWindow(reg_window=self.reg_window, main_window=self)
         self.button_entrance.show()
         print("click button_entrance")
 
 
 class RegWindow(QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None, reg_window=None, main_window=None):
+        super().__init__(parent)
+        self.reg_window = reg_window
+        self.main_window = main_window
         self.setWindowTitle("Регистрация")
         self.setGeometry(500, 110, start.WMaxReg, start.HMaxReg)
         self.setStyleSheet("background-color: #1C1C1C;")
@@ -243,15 +249,16 @@ class RegWindow(QWidget):
                     with open(f'assets/user.json', 'w') as f:
                         json.dump(user_data, f, indent=4, ensure_ascii=False)
 
-                    if result == QMessageBox.StandardButton.Ok:
-                        self.regWindowLabel()
-                        self.close()
+                    if result == 1024:
+                        if result == 1024:
+                            if self.reg_window:
+                                self.reg_window.close()
+                            if self.main_window:
+                                self.main_window.close()
+                            self.close()
+                            self.main_window = MainMenuWindow()
+                            self.main_window.show()
 
-                        self.main_window = MainMenuWindow()
-                        self.main_window.show()
-
-                        # Закройте окно регистрации
-                        self.close()
                 else:
                     print(f"USER: {login} IS NOT REGISTER\n")
                     msg_box = QMessageBox()
@@ -272,8 +279,10 @@ class RegWindow(QWidget):
             self.repeat_password_input.clear()
         print("click button_reg_win")
 class EntranceWindow(QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None, reg_window=None, main_window=None):
+        super().__init__(parent)
+        self.reg_window = reg_window
+        self.main_window = main_window
         self.setWindowTitle("Вход")
         self.setGeometry(500, 110, start.WMaxReg, start.HMaxReg)
         self.setStyleSheet("background-color: #1C1C1C;")
@@ -351,7 +360,7 @@ class EntranceWindow(QWidget):
             msg_box.setWindowTitle("Оповещение")
             msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
             result = msg_box.exec()
-            start.clear_window_widgets(QWidget)
+            print(result)
             user_data = {
                 "name": login_user.getUserName(login),
                 "email": login
@@ -359,10 +368,14 @@ class EntranceWindow(QWidget):
             with open(f'assets/user.json', 'w') as f:
                 json.dump(user_data, f, indent=4, ensure_ascii=False)
 
-            if result == QMessageBox.StandardButton.Ok:
-                self.entranceWindowLabel()
+            if result == 1024:
+                if self.reg_window:
+                    self.reg_window.close()
+                if self.main_window:
+                    self.main_window.close()
                 self.close()
-                start.assetsPathAppend()
+                self.main_window = MainMenuWindow()
+                self.main_window.show()
         else:
             msg_box = QMessageBox()
             msg_box.setIcon(QMessageBox.Icon.Warning)
@@ -373,11 +386,14 @@ class EntranceWindow(QWidget):
             self.login_input_entrance.clear()
             self.password_input_entrance.clear()
 
+
 class MainMenuWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Главное меню")
-        self.setGeometry(300, 200, 800, 600)
+        self.setGeometry(175, 75, start.WMax, start.HMax)
+        self.setStyleSheet("background-color: #1C1C1C;")
+        self.setFixedSize(start.WMax, start.HMax)
         label = QLabel("Добро пожаловать в главное меню!", self)
         label.move(50, 50)
         self.show()
