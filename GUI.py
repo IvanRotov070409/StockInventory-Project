@@ -465,6 +465,22 @@ class MainMenuWindow(QMainWindow):
 
         exit_button.clicked.connect(self.on_exit_clicked)
 
+        help_button = QPushButton("", self)
+        help_button.setText("Поддержка")
+        help_button.setFont(start.font_Regular(12))
+        help_button.move(300, 25)
+        help_button.setFixedSize(150, 40)
+        help_button.setCursor(Qt.CursorShape(13))
+        help_button.setIcon(QIcon("ProjectImage/mainWin/help.svg"))
+        help_button.setIconSize(QSize(30, 30))
+        help_button.setStyleSheet("""
+            QPushButton {
+                border-radius: 10px;
+                border: 1.2px solid white;
+                font-weight: 500;
+            }
+        """)
+
     def on_exit_clicked(self):
         print("click exit_button")
         if os.path.exists("assets/user.json"):

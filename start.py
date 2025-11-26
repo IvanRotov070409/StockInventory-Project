@@ -30,6 +30,12 @@ def font_Regular(x):
     font_Regular = QFont(font_families[0], x)
     return font_Regular
 
+def font_Blod(x):
+    font_id = QFontDatabase.addApplicationFont("Font/MTSCompact-Bold.ttf")
+    font_families = QFontDatabase.applicationFontFamilies(font_id)
+    font_Regular = QFont(font_families[0], x)
+    return font_Regular
+
 
 def clear_window_widgets(window: QWidget):
     for child in window.findChildren(QWidget):
