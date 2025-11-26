@@ -4,7 +4,7 @@ import webbrowser
 import json
 import os
 import re
-from PyQt6.QtWidgets import QWidget, QPushButton, QFrame, QLabel, QLineEdit, QCheckBox, QMessageBox
+from PyQt6.QtWidgets import QWidget, QPushButton, QFrame, QLabel, QLineEdit, QCheckBox, QMessageBox, QVBoxLayout, QMainWindow, QHBoxLayout
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPixmap, QIcon
 
@@ -16,7 +16,7 @@ class MainWindow(QWidget):
             super().__init__()
             self.reg_window = None
             self.button_entrance = None
-            self.setWindowTitle("StockBalance - Инвентаризация склада магазинов")
+            self.setWindowTitle("Регистрация")
             self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
             self.setGeometry(175, 75, start.WMax, start.HMax)
             self.setStyleSheet("background-color: #1C1C1C;")
@@ -387,13 +387,95 @@ class EntranceWindow(QWidget):
             self.password_input_entrance.clear()
 
 
-class MainMenuWindow(QWidget):
+class MainMenuWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Главное меню")
+        self.setWindowTitle("StockBalance - Инвентаризация склада магазинов")
         self.setGeometry(175, 75, start.WMax, start.HMax)
         self.setStyleSheet("background-color: #1C1C1C;")
         self.setFixedSize(start.WMax, start.HMax)
-        label = QLabel("Добро пожаловать в главное меню!", self)
-        label.move(50, 50)
+        self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
+        self.Main()
         self.show()
+
+    def Main(self):
+        with open('assets/user.json', 'r') as file:
+            data = json.load(file)
+        user_name = data.get("name")
+
+        container = QWidget(self)
+        container.setFixedSize(250, 60)
+        container.move(start.WMax - 330, 10)
+        container.show()
+
+        main_layout = QHBoxLayout()
+        container.setLayout(main_layout)
+
+        vertical_layout = QVBoxLayout()
+
+        user_hud = QLabel(f"<b>{user_name}</b>")
+        user_hud.setFont(start.font_Medium(12))
+        vertical_layout.addWidget(user_hud)
+
+        state = QLabel("Главный менеджер")
+        state.setFont(start.font_Regular(10))
+        vertical_layout.addWidget(state)
+
+        button = QPushButton()
+        button.setIcon(QIcon("ProjectImage/mainWin/user_icon.svg"))
+        button.setFixedSize(50, 32)
+        button.setIconSize(QSize(32, 32))
+        button.setStyleSheet("""
+            QPushButton {
+                text-align: center;
+                border: none;
+                border-radius: 20px;
+            }
+        """)
+
+        main_layout.addWidget(button)
+        main_layout.addLayout(vertical_layout)
+        main_layout.setStretch(0, 1)
+        main_layout.setStretch(1, 2)
+
+        settings_button = QPushButton("", self)
+        settings_button.setFixedSize(50, 50)
+        settings_button.move(start.WMax - 130, 20)
+        settings_button.setIcon(QIcon("ProjectImage/mainWin/Settings.svg"))
+        settings_button.setIconSize(QSize(20, 20))
+        settings_button.setStyleSheet("""
+            QPushButton {
+                border-radius: 8px;
+            }
+        """)
+        settings_button.setCursor(Qt.CursorShape(13))
+        settings_button.clicked.connect(self.on_settings_clicked)
+
+        exit_button = QPushButton("", self)
+        exit_button.setFixedSize(50, 50)
+        exit_button.move(start.WMax - 80, 20)
+        exit_button.setIcon(QIcon("ProjectImage/mainWin/Exit.svg"))
+        exit_button.setIconSize(QSize(20, 20))
+        exit_button.setStyleSheet("""
+            QPushButton {
+                border-radius: 8px;
+            }
+        """)
+        exit_button.setCursor(Qt.CursorShape(13))
+
+        exit_button.clicked.connect(self.on_exit_clicked)
+
+    def on_exit_clicked(self):
+        print("click exit_button")
+        if os.path.exists("assets/user.json"):
+            os.remove("assets/user.json")
+        self.close()
+
+        self.login_window = MainWindow()
+        self.login_window.show()
+
+    def on_settings_clicked(self):
+        print("click settings_button")
+
+
+
