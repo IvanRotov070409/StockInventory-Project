@@ -481,6 +481,48 @@ class MainMenuWindow(QMainWindow):
             }
         """)
 
+        button_question_main = QPushButton("Есть вопросы?", self)
+        button_question_main.setFont(start.font_Regular(12))
+        button_question_main.setFixedSize(150, 40)
+        button_question_main.move(1020, 630)
+        button_question_main.setIcon(QIcon("ProjectImage/regMainWin/question.svg"))
+        button_question_main.setIconSize(QSize(26, 26))
+        button_question_main.setCursor(Qt.CursorShape(13)),
+        button_question_main.setStyleSheet(start.base_style_button)
+        button_question_main.clicked.connect(self.on_button_question_main_clicked)
+
+        container_text_header = QWidget(self)
+        container_text_header.setFixedSize(200, 125)
+        container_text_header.move(290, 125)
+        container_text_header.show()
+
+        text_header_label = QVBoxLayout()
+        container_text_header.setLayout(text_header_label)
+
+        head_text = QLabel("Главная")
+        head_text.setFont(start.font_Medium(30))
+        text_header_label.addWidget(head_text)
+
+        sub_text = QLabel("Магазины")
+        sub_text.setFont(start.font_Regular(14))
+        text_header_label.addWidget(sub_text)
+
+        plus_mag = QPushButton("Добавить магазин", self)
+        plus_mag.setFixedSize(200, 50)
+        plus_mag.setFont(start.font_Medium(12))
+        plus_mag.setIcon(QIcon("ProjectImage/mainWin/Plus.svg"))
+        plus_mag.setIconSize(QSize(34, 34))
+        plus_mag.setStyleSheet(start.base_style_button)
+        plus_mag.setStyleSheet("""
+            QPushButton {
+                border: 1px solid white;
+                border-radius: 10px;
+            }
+        """)
+        plus_mag.move(start.WMax-250, 125)
+        plus_mag.setCursor(Qt.CursorShape(13))
+        plus_mag.clicked.connect(self.on_plus_mag_clicked)
+
     def on_exit_clicked(self):
         print("click exit_button")
         if os.path.exists("assets/user.json"):
@@ -492,6 +534,13 @@ class MainMenuWindow(QMainWindow):
 
     def on_settings_clicked(self):
         print("click settings_button")
+
+    def on_plus_mag_clicked(self):
+        print("click plus_mag")
+
+    def on_button_question_main_clicked(self):
+        print("click button_question_main")
+
 
 
 

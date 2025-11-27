@@ -73,6 +73,13 @@ main_window_but_style = """
     }
 """
 
+base_style_button = """
+    QPushButton {
+        background-color: none;
+        border: none;
+    }
+"""
+
 
 app = QApplication(sys.argv)
 window = GUI.MainWindow()
