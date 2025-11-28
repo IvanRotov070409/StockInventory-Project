@@ -49,3 +49,13 @@ from PyQt6.QtWidgets import QWidget, QLabel, QApplication, QPushButton, QFrame, 
 
 <img width="1091" height="817" alt="image" src="https://github.com/user-attachments/assets/73fcdd7f-a273-4a4d-b131-39d1d7332161" />
 
+---
+
+## Макет
+**Во время разработки проекта было выполнено визуальное проектирование приложения в графическом редакторе ```Figma```. Данная монипуляция позволила сформировать представление о приложении.**
+
+Готовый макет в ```Figma``` служит основой для дальнейшей разработки.
+
+_**Ознакомиться с макетом можно по [ссылке](https://www.figma.com/design/9FQokcbqpZ7rOG564hjqS8/Untitled?node-id=0-1&t=MSJvmkjPiGUoKTQt-1)**_
+<img width="1121" height="268" alt="image" src="https://github.com/user-attachments/assets/5eff02e1-b8c6-4ce6-9431-294652c020a3" />
+
