@@ -1,16 +1,24 @@
-import login_user
-import start
-import webbrowser
-import json
 import os
 import re
-from PyQt6.QtWidgets import QWidget, QPushButton, QFrame, QLabel, QLineEdit, QCheckBox, QMessageBox, QVBoxLayout, QMainWindow, QHBoxLayout
+import json
+import start
+import webbrowser
+import login_user
+import random
+import string
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QPixmap, QIcon
+from PyQt6.QtGui import QPixmap, QIcon, QFont
+from PyQt6.QtWidgets import QWidget, QPushButton, QSizePolicy, QFrame, QLabel, QLineEdit, QCheckBox, QMessageBox, QVBoxLayout, QMainWindow, QHBoxLayout
 
+def generate_shop_id():
+    """Генерирует случайный shop_id в формате 12345_abcdefghi"""
+    digits = ''.join(random.choices(string.digits, k=5))
+    letters = ''.join(random.choices(string.ascii_lowercase, k=10))
+    return f"{digits}_{letters}"
+def has_cyrillic(text):
+    return bool(re.search(r'[а-яА-ЯёЁ]', text))
 
 class MainWindow(QWidget):
-
     if os.path.exists("assets/user.json") == False:
         def __init__(self):
             super().__init__()
@@ -60,7 +68,7 @@ class MainWindow(QWidget):
         line.setFrameShape(QFrame.Shape.HLine)
         line.setFrameShadow(QFrame.Shadow.Sunken)
         line.setStyleSheet("border-top: 1px solid white; ")
-        line.move(350, 387)  # позиция, чтобы разделить зоны
+        line.move(350, 387)
         line.setFixedWidth(472)
 
         or_label = QLabel("или", self)
@@ -390,6 +398,7 @@ class EntranceWindow(QWidget):
 class MainMenuWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.addShopsWindow = None
         self.setWindowTitle("StockBalance - Инвентаризация склада магазинов")
         self.setGeometry(175, 75, start.WMax, start.HMax)
         self.setStyleSheet("background-color: #1C1C1C;")
@@ -535,12 +544,97 @@ class MainMenuWindow(QMainWindow):
     def on_settings_clicked(self):
         print("click settings_button")
 
-    def on_plus_mag_clicked(self):
-        print("click plus_mag")
-
     def on_button_question_main_clicked(self):
         print("click button_question_main")
 
+    def on_plus_mag_clicked(self):
+        """Обработчик нажатия кнопки «Добавить магазин»"""
+        if self.addShopsWindow is None or not self.addShopsWindow.isVisible():
+            self.addShopsWindow = AddShops(parent=self)
+        self.addShopsWindow.show()
+        self.addShopsWindow.raise_()
+        print("click plus_mag")
+
+class AddShops(QMainWindow):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+
+        # Настройки окна
+        self.setWindowTitle("Добавить магазин")
+        self.resize(550, 400)
+        self.setMinimumSize(550, 300)
+        self.setMaximumSize(550, 400)
+        self.setStyleSheet("background-color: #1C1C1C; color: white;")
+
+        # Центральный виджет и макет
+        central_widget = QWidget(self)
+        self.setCentralWidget(central_widget)
+        layout = QVBoxLayout(central_widget)
+
+        self._setup_ui(layout)
+
+    def _setup_ui(self, layout):
+        head_text_entrance = QLabel("Добавить магазин", self)
+        head_text_entrance.setFont(start.font_Medium(28))
+        head_text_entrance.adjustSize()
+        head_text_entrance.move(115, 50)
+
+        self.sub_text_entrance = QLabel("Введите данные о магазине в поля\nниже: ", self)
+        self.sub_text_entrance.setFont(start.font_Regular(12))
+        self.sub_text_entrance.adjustSize()
+        self.sub_text_entrance.move(115, 120)
+
+        login_warn_text = QLabel("Пожалуйста, введите название на кириллице", self)
+        login_warn_text.setFont(start.font_Regular(10))
+        login_warn_text.move(115, 250)
+        login_warn_text.adjustSize()
+        login_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+
+        self.login_input_entrance = QLineEdit(self)
+        self.login_input_entrance.setPlaceholderText("Название магазина")
+        self.login_input_entrance.setGeometry(115, 190, 310, 50)
+        self.login_input_entrance.setFont(start.font_Medium(28))
+        self.login_input_entrance.setStyleSheet(start.input_style)
+
+        self.button_entrance = QPushButton("Добавить", self)
+        self.button_entrance.setFont(start.font_Regular(12))
+        self.button_entrance.setGeometry(170, 315, 200, 40)
+        self.button_entrance.setFont(start.font_Regular(12))
+        self.button_entrance.setCursor(Qt.CursorShape(13))
+        self.button_entrance.setStyleSheet("""
+                            QPushButton {
+                                background-color: #fff;
+                                color: rgb(15,15,15);
+                                text-align: center;
+                                border: none;
+                                padding: 10px 15px;
+                                border-radius: 20px;
+                            }
+                        """)
+        self.button_entrance.clicked.connect(self._on_save)
+    def _on_save(self):
+        """Обработка сохранения"""
+        try:
+            # Проверка виджетов
+            if self.login_input_entrance is None:
+                QMessageBox.critical(self, "Ошибка", "Интерфейс не загружен!")
+                return
+
+            name = self.login_input_entrance.text().strip()
+
+            if not name:
+                QMessageBox.warning(self, "Ошибка", "Пожалуйста, заполните все поля!")
+                return
+            if has_cyrillic(name):
+                print(f"Сохранено: {name}")
+                login_user.addMag(name, generate_shop_id())
+                QMessageBox.information(self, "Успех", "Магазин успешно добавлен!")
+            else:
+                QMessageBox.warning(self, "Ошибка", "Пожалуйста, используйте кириллицу!")
+            self.close()
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка", f"Произошла ошибка: {str(e)}")
 
 
 
