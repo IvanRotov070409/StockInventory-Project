@@ -74,3 +74,40 @@ def addMag(name, shop_id):
         print(f"ERROR SQLITE3: {error}")
         return False
 
+def get_shops_by_user():
+    with open('assets/user.json', 'r', encoding='windows-1251') as f:
+        user_data = json.load(f)
+        email = user_data['email']
+    try:
+        with sqlite3.connect("DataBase/Base/RegisterUserDataBase.db", timeout=30) as db:
+            c = db.cursor()
+            c.execute("SELECT user_id FROM users WHERE login = ?", (email,))
+            user_id_result = c.fetchone()
+
+            if not user_id_result:
+                print(f"Не найден user_id для email: {email}")
+                return None
+
+            user_id = user_id_result[0]
+            c.execute("SELECT name, shop_id FROM shop WHERE user_id = ?", (user_id,))
+            shops = c.fetchall()
+            total_shops = len(shops)
+
+            # Выводим результат
+            # print(f"Количество магазинов: {total_shops}")
+            # print("Список магазинов:")
+            for name, shop_id in shops:
+                # print(f"  Название: {name}, ID магазина: {shop_id}")
+                pass
+
+            return {
+                "total_shops": total_shops,
+                "shops": [{"name": name, "shop_id": shop_id} for name, shop_id in shops]
+            }
+
+    except sqlite3.Error as error:
+        print(f"ERROR SQLITE3: {error}")
+        return None
+
+
+

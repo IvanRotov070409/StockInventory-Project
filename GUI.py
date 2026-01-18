@@ -63,7 +63,6 @@ class MainWindow(QWidget):
         button_entrance.setCursor(Qt.CursorShape(13))
         button_entrance.setStyleSheet(start.main_window_but_style)
 
-        # Создаем линию
         line = QFrame(self)
         line.setFrameShape(QFrame.Shape.HLine)
         line.setFrameShadow(QFrame.Shadow.Sunken)
@@ -394,6 +393,46 @@ class EntranceWindow(QWidget):
             self.login_input_entrance.clear()
             self.password_input_entrance.clear()
 
+def update_shops_list(self):
+    for i in reversed(range(self.main_vbox.count())):
+        layout = self.main_vbox.itemAt(i).layout()
+        if layout:
+            for j in reversed(range(layout.count())):
+                layout.itemAt(j).widget().deleteLater()
+            self.main_vbox.removeItem(layout)
+
+    result = login_user.get_shops_by_user()
+    rows = []
+    current_row = None
+
+    for i in range(len(result["shops"])):
+        name = result["shops"][i]["name"]
+        shop_id = result["shops"][i]["shop_id"]
+        shop_container = QWidget()
+        shop_container.setFixedWidth(150)
+        shop_container.setStyleSheet("border: 1.5px solid white; border-radius: 5px;")
+
+        container_layout = QVBoxLayout()
+        container_layout.setContentsMargins(10, 10, 10, 10)
+        shop_container.setLayout(container_layout)
+
+        name_shop = QLabel(f"{name}")
+        name_shop.setFont(start.font_Regular(14))
+        name_shop.setStyleSheet("border: none;")
+        container_layout.addWidget(name_shop)
+
+        id_text = QLabel(f"ID: {shop_id}")
+        id_text.setFont(start.font_Regular(10))
+        id_text.setStyleSheet("border: none;")
+        container_layout.addWidget(id_text)
+
+        if i % 2 == 0:
+            current_row = QHBoxLayout()
+            rows.append(current_row)
+        current_row.addWidget(shop_container)
+
+    for row in rows:
+        self.main_vbox.addLayout(row)
 
 class MainMenuWindow(QMainWindow):
     def __init__(self):
@@ -411,7 +450,7 @@ class MainMenuWindow(QMainWindow):
         with open('assets/user.json', 'r') as file:
             data = json.load(file)
         user_name = data.get("name")
-
+        result = login_user.get_shops_by_user()
         container = QWidget(self)
         container.setFixedSize(250, 60)
         container.move(start.WMax - 330, 10)
@@ -421,7 +460,6 @@ class MainMenuWindow(QMainWindow):
         container.setLayout(main_layout)
 
         vertical_layout = QVBoxLayout()
-
         user_hud = QLabel(f"<b>{user_name}</b>")
         user_hud.setFont(start.font_Medium(12))
         vertical_layout.addWidget(user_hud)
@@ -446,6 +484,7 @@ class MainMenuWindow(QMainWindow):
         main_layout.addLayout(vertical_layout)
         main_layout.setStretch(0, 1)
         main_layout.setStretch(1, 2)
+
 
         settings_button = QPushButton("", self)
         settings_button.setFixedSize(50, 50)
@@ -510,12 +549,13 @@ class MainMenuWindow(QMainWindow):
 
         head_text = QLabel("Главная")
         head_text.setFont(start.font_Medium(30))
+        head_text.adjustSize()
         text_header_label.addWidget(head_text)
 
         sub_text = QLabel("Магазины")
         sub_text.setFont(start.font_Regular(14))
         text_header_label.addWidget(sub_text)
-
+        self._build_shops_section()
         plus_mag = QPushButton("Добавить магазин", self)
         plus_mag.setFixedSize(200, 50)
         plus_mag.setFont(start.font_Medium(12))
@@ -532,6 +572,48 @@ class MainMenuWindow(QMainWindow):
         plus_mag.setCursor(Qt.CursorShape(13))
         plus_mag.clicked.connect(self.on_plus_mag_clicked)
 
+    def _build_shops_section(self):
+        result = login_user.get_shops_by_user()
+        width = [100, 100, 200, 200, 300, 300]
+        self.container_shop_header = QWidget(self)
+        self.container_shop_header.setFixedSize(800, width[len(result["shops"])-1])
+        self.container_shop_header.move(290, 250)
+
+        main_vbox = QVBoxLayout()
+        self.container_shop_header.setLayout(main_vbox)
+
+        rows = []
+        current_row = None
+
+        for i, shop in enumerate(result["shops"]):
+            shop_container = QWidget()
+            shop_container.setStyleSheet("border: 1.5px solid white; border-radius: 5px;")
+            container_layout = QVBoxLayout()
+            container_layout.setContentsMargins(10, 10, 10, 10)
+            shop_container.setLayout(container_layout)
+
+            name_shop = QLabel(f"{shop['name']}")
+            name_shop.setFont(start.font_Regular(14))
+            name_shop.setStyleSheet("border: none;")
+            container_layout.addWidget(name_shop)
+
+            id_text = QLabel(f"ID: {shop['shop_id']}")
+            id_text.setFont(start.font_Regular(10))
+            id_text.setStyleSheet("border: none;")
+            container_layout.addWidget(id_text)
+
+            if i % 2 == 0:
+                current_row = QHBoxLayout()
+                rows.append(current_row)
+            current_row.addWidget(shop_container)
+
+        for row in rows:
+            main_vbox.addLayout(row)
+
+        self.container_shop_header.show()
+
+    def refresh_shops(self):
+        self._build_shops_section()
     def on_exit_clicked(self):
         print("click exit_button")
         if os.path.exists("assets/user.json"):
@@ -548,12 +630,19 @@ class MainMenuWindow(QMainWindow):
         print("click button_question_main")
 
     def on_plus_mag_clicked(self):
-        """Обработчик нажатия кнопки «Добавить магазин»"""
         if self.addShopsWindow is None or not self.addShopsWindow.isVisible():
             self.addShopsWindow = AddShops(parent=self)
         self.addShopsWindow.show()
         self.addShopsWindow.raise_()
         print("click plus_mag")
+
+def _refresh_main_window(self):
+    central_widget = QWidget()
+    layout = QVBoxLayout()
+    self._setup_ui(layout)
+
+    central_widget.setLayout(layout)
+    self.setCentralWidget(central_widget)
 
 class AddShops(QMainWindow):
     def __init__(self, parent=None):
@@ -567,7 +656,6 @@ class AddShops(QMainWindow):
         self.setMaximumSize(550, 400)
         self.setStyleSheet("background-color: #1C1C1C; color: white;")
 
-        # Центральный виджет и макет
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
@@ -613,16 +701,18 @@ class AddShops(QMainWindow):
                             }
                         """)
         self.button_entrance.clicked.connect(self._on_save)
+
     def _on_save(self):
-        """Обработка сохранения"""
         try:
-            # Проверка виджетов
             if self.login_input_entrance is None:
                 QMessageBox.critical(self, "Ошибка", "Интерфейс не загружен!")
                 return
 
             name = self.login_input_entrance.text().strip()
-
+            result = login_user.get_shops_by_user()
+            if len(result["shops"]) >= 6:
+                QMessageBox.warning(self, "Ошибка", "Добавлено максимальное количество магазинов!")
+                return
             if not name:
                 QMessageBox.warning(self, "Ошибка", "Пожалуйста, заполните все поля!")
                 return
@@ -630,11 +720,14 @@ class AddShops(QMainWindow):
                 print(f"Сохранено: {name}")
                 login_user.addMag(name, generate_shop_id())
                 QMessageBox.information(self, "Успех", "Магазин успешно добавлен!")
+
+                if self.parent and hasattr(self.parent, 'refresh_shops'):
+                    self.parent.refresh_shops()
+
+                self.close()
             else:
                 QMessageBox.warning(self, "Ошибка", "Пожалуйста, используйте кириллицу!")
-            self.close()
         except Exception as e:
             QMessageBox.critical(self, "Ошибка", f"Произошла ошибка: {str(e)}")
-
 
 
