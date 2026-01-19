@@ -7,8 +7,8 @@ import login_user
 import random
 import string
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QPixmap, QIcon, QFont
-from PyQt6.QtWidgets import QWidget, QPushButton, QSizePolicy, QFrame, QLabel, QLineEdit, QCheckBox, QMessageBox, QVBoxLayout, QMainWindow, QHBoxLayout
+from PyQt6.QtGui import QPixmap, QIcon, QFont, QPalette, QColor
+from PyQt6.QtWidgets import QWidget, QPushButton, QApplication, QFrame, QLabel, QLineEdit, QCheckBox, QMessageBox, QVBoxLayout, QMainWindow, QHBoxLayout
 
 def generate_shop_id():
     """Генерирует случайный shop_id в формате 12345_abcdefghi"""
@@ -24,6 +24,7 @@ class MainWindow(QWidget):
             super().__init__()
             self.reg_window = None
             self.button_entrance = None
+            self.setWhiteTheme()
             self.setWindowTitle("Регистрация")
             self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
             self.setGeometry(175, 75, start.WMax, start.HMax)
@@ -35,6 +36,40 @@ class MainWindow(QWidget):
         def __init__(self):
             self.main_window = MainMenuWindow()
             self.main_window.show()
+
+    def setWhiteTheme(self):
+        palette = QPalette()
+
+        # Установка чёрного цвета для области окна (чёлки)
+        palette.setColor(QPalette.ColorRole.Window, QColor(0, 0, 0))  # Чёрный фон окна
+        palette.setColor(QPalette.ColorRole.WindowText, QColor(255, 255, 255))  # Белый текст
+
+        # Остальные цвета интерфейса
+        palette.setColor(QPalette.ColorRole.Base, QColor(255, 255, 255))  # Белый базовый цвет
+        palette.setColor(QPalette.ColorRole.AlternateBase, QColor(255, 255, 220))  # Альтернативный фон
+        palette.setColor(QPalette.ColorRole.Text, QColor(0, 0, 0))  # Чёрный цвет текста
+        palette.setColor(QPalette.ColorRole.Button, QColor(255, 255, 255))  # Белый цвет кнопок
+        palette.setColor(QPalette.ColorRole.ButtonText, QColor(255, 255, 255))  # Чёрный текст кнопок
+        palette.setColor(QPalette.ColorRole.BrightText, QColor(255, 255, 255))  # Яркий текст
+        palette.setColor(QPalette.ColorRole.Link, QColor(42, 130, 218))  # Цвет ссылок
+        palette.setColor(QPalette.ColorRole.Highlight, QColor(180, 180, 180))  # Цвет выделения
+        palette.setColor(QPalette.ColorRole.HighlightedText, QColor(0, 0, 0))  # Цвет текста при выделении
+
+        # Применение палитры
+        app = QApplication.instance()
+        app.setPalette(palette)
+        self.setPalette(palette)
+
+        # Дополнительные настройки для системных рамок
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: black;  /* Чёрный цвет области окна */
+            }
+            QWidget {
+                background-color: white;  /* Белый цвет основного контента */
+            }
+        """)
+
     def regMainWin(self):
         image_logo = "ProjectImage/regMainWin/Indust_logo-png.png"
         with open(image_logo):
@@ -132,6 +167,7 @@ class RegWindow(QWidget):
         super().__init__(parent)
         self.reg_window = reg_window
         self.main_window = main_window
+        self.setWhiteTheme()
         self.setWindowTitle("Регистрация")
         self.setGeometry(500, 110, start.WMaxReg, start.HMaxReg)
         self.setStyleSheet("background-color: #1C1C1C;")
@@ -139,6 +175,8 @@ class RegWindow(QWidget):
         self.regWindowLabel()
         self.show()
 
+    def setWhiteTheme(self):
+        self.setPalette(QApplication.instance().palette())
     def regWindowLabel(self):
         head_text_reg = QLabel("Регистрация", self)
         head_text_reg.setFont(start.font_Medium(28))
@@ -290,6 +328,7 @@ class EntranceWindow(QWidget):
         super().__init__(parent)
         self.reg_window = reg_window
         self.main_window = main_window
+        self.setWhiteTheme()
         self.setWindowTitle("Вход")
         self.setGeometry(500, 110, start.WMaxReg, start.HMaxReg)
         self.setStyleSheet("background-color: #1C1C1C;")
@@ -297,6 +336,8 @@ class EntranceWindow(QWidget):
         self.entranceWindowLabel()
         self.show()
 
+    def setWhiteTheme(self):
+        self.setPalette(QApplication.instance().palette())
     def entranceWindowLabel(self):
         head_text_entrance = QLabel("Вход", self)
         head_text_entrance.setFont(start.font_Medium(28))
@@ -410,14 +451,14 @@ def update_shops_list(self):
         shop_id = result["shops"][i]["shop_id"]
         shop_container = QWidget()
         shop_container.setFixedWidth(150)
-        shop_container.setStyleSheet("border: 1.5px solid white; border-radius: 5px;")
+        shop_container.setStyleSheet("border: 1.5px solid white; border-radius: 15px;")
 
         container_layout = QVBoxLayout()
         container_layout.setContentsMargins(10, 10, 10, 10)
         shop_container.setLayout(container_layout)
 
         name_shop = QLabel(f"{name}")
-        name_shop.setFont(start.font_Regular(14))
+        name_shop.setFont(start.font_Medium(14))
         name_shop.setStyleSheet("border: none;")
         container_layout.addWidget(name_shop)
 
@@ -438,6 +479,7 @@ class MainMenuWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.addShopsWindow = None
+        self.setWhiteTheme()
         self.setWindowTitle("StockBalance - Инвентаризация склада магазинов")
         self.setGeometry(175, 75, start.WMax, start.HMax)
         self.setStyleSheet("background-color: #1C1C1C;")
@@ -445,7 +487,8 @@ class MainMenuWindow(QMainWindow):
         self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
         self.Main()
         self.show()
-
+    def setWhiteTheme(self):
+        self.setPalette(QApplication.instance().palette())
     def Main(self):
         with open('assets/user.json', 'r') as file:
             data = json.load(file)
@@ -498,6 +541,20 @@ class MainMenuWindow(QMainWindow):
         """)
         settings_button.setCursor(Qt.CursorShape(13))
         settings_button.clicked.connect(self.on_settings_clicked)
+
+        reload_but = QPushButton("", self)
+        reload_but.setFixedSize(40, 40)
+        reload_but.move(start.WMax - 165, 190)
+        reload_but.setIcon(QIcon("ProjectImage/mainWin/reload.svg"))
+        reload_but.setIconSize(QSize(20, 20))
+        reload_but.setCursor(Qt.CursorShape(13))
+        reload_but.setStyleSheet("""
+            QPushButton {
+                border-radius: 15px;
+                background-color: #242424;
+            }
+        """)
+        reload_but.clicked.connect(self.reload_but)
 
         exit_button = QPushButton("", self)
         exit_button.setFixedSize(50, 50)
@@ -576,7 +633,7 @@ class MainMenuWindow(QMainWindow):
         result = login_user.get_shops_by_user()
         width = [100, 100, 200, 200, 300, 300]
         self.container_shop_header = QWidget(self)
-        self.container_shop_header.setFixedSize(800, width[len(result["shops"])-1])
+        self.container_shop_header.setFixedSize(800, width[len(result["shops"]) - 1])
         self.container_shop_header.move(290, 250)
 
         main_vbox = QVBoxLayout()
@@ -587,20 +644,52 @@ class MainMenuWindow(QMainWindow):
 
         for i, shop in enumerate(result["shops"]):
             shop_container = QWidget()
-            shop_container.setStyleSheet("border: 1.5px solid white; border-radius: 5px;")
+            shop_container.setStyleSheet("border: 1.5px solid white; border-radius: 10px;")
             container_layout = QVBoxLayout()
             container_layout.setContentsMargins(10, 10, 10, 10)
             shop_container.setLayout(container_layout)
 
+            # Создаем горизонтальный макет для информации и кнопки
+            info_layout = QHBoxLayout()
+            info_layout.setContentsMargins(0, 0, 0, 0)
+            info_layout.setSpacing(10)
+
+            # Макет для информации о магазине
+            info_widget = QWidget()
+            info_widget.setStyleSheet("border: none;")
+            info_layout_inner = QVBoxLayout()
+            info_widget.setLayout(info_layout_inner)
+
             name_shop = QLabel(f"{shop['name']}")
-            name_shop.setFont(start.font_Regular(14))
-            name_shop.setStyleSheet("border: none;")
-            container_layout.addWidget(name_shop)
+            name_shop.setFont(start.font_Medium(15))
+            name_shop.setStyleSheet("border: none; background: none;")
+            info_layout_inner.addWidget(name_shop)
 
             id_text = QLabel(f"ID: {shop['shop_id']}")
             id_text.setFont(start.font_Regular(10))
-            id_text.setStyleSheet("border: none;")
-            container_layout.addWidget(id_text)
+            id_text.setStyleSheet("border: none; background: none;")
+            info_layout_inner.addWidget(id_text)
+
+            info_layout.addWidget(info_widget, 1)  # Растягиваем информацию
+
+            # Кнопка справа
+            id_but = QPushButton("Открыть →", self)
+            id_but.setFont(start.font_Regular(11))
+            id_but.setCursor(Qt.CursorShape.PointingHandCursor)
+            id_but.setFixedSize(125, 35)
+            id_but.setStyleSheet("""
+                QPushButton {
+                    background-color: #fff;
+                    color: rgb(15,15,15);
+                    text-align: center;
+                    border: none;
+                    padding: 10px 15px;
+                    border-radius: 17px;
+                }
+            """)
+            info_layout.addWidget(id_but, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)  # Исправлено
+
+            container_layout.addLayout(info_layout)
 
             if i % 2 == 0:
                 current_row = QHBoxLayout()
@@ -636,6 +725,10 @@ class MainMenuWindow(QMainWindow):
         self.addShopsWindow.raise_()
         print("click plus_mag")
 
+    def reload_but(self):
+        self._build_shops_section()
+        print("click reload_but")
+
 def _refresh_main_window(self):
     central_widget = QWidget()
     layout = QVBoxLayout()
@@ -648,7 +741,7 @@ class AddShops(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
-
+        self.setWhiteTheme()
         # Настройки окна
         self.setWindowTitle("Добавить магазин")
         self.resize(550, 400)
@@ -661,7 +754,8 @@ class AddShops(QMainWindow):
         layout = QVBoxLayout(central_widget)
 
         self._setup_ui(layout)
-
+    def setWhiteTheme(self):
+        self.setPalette(QApplication.instance().palette())
     def _setup_ui(self, layout):
         head_text_entrance = QLabel("Добавить магазин", self)
         head_text_entrance.setFont(start.font_Medium(28))
@@ -720,10 +814,8 @@ class AddShops(QMainWindow):
                 print(f"Сохранено: {name}")
                 login_user.addMag(name, generate_shop_id())
                 QMessageBox.information(self, "Успех", "Магазин успешно добавлен!")
-
                 if self.parent and hasattr(self.parent, 'refresh_shops'):
                     self.parent.refresh_shops()
-
                 self.close()
             else:
                 QMessageBox.warning(self, "Ошибка", "Пожалуйста, используйте кириллицу!")
