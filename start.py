@@ -3,6 +3,7 @@ import GUI
 import os
 from PyQt6.QtWidgets import QApplication, QWidget
 from PyQt6.QtGui import QFont, QFontDatabase
+import configparser
 
 #Константы в виде размера окон
 WMax = 1200
@@ -10,6 +11,31 @@ HMax = 700
 
 WMaxReg = 525
 HMaxReg = 650
+
+def create_settings():
+    config = configparser.ConfigParser()
+
+    config['DEFAULT'] = {
+        'layout_main': '2',
+    }
+
+    with open('assets/config.ini', 'w') as configfile:
+        config.write(configfile)
+
+def get_settings(section, option):
+    config = configparser.ConfigParser()
+    config.read('assets/config.ini')
+
+    return config.get(section, option)
+
+def edit_settings(section, option, value):
+    config = configparser.ConfigParser()
+    config.read('assets/config.ini')
+
+    config.set(section, option, value)
+
+    with open('config.ini', 'w') as configfile:
+        config.write(configfile)
 
 def assetsPathAppend():
     try:
