@@ -9,7 +9,7 @@ import string
 from PyQt6.QtCore import Qt, QSize
 import configparser
 from PyQt6.QtGui import QPixmap, QIcon, QFont, QPalette, QColor
-from PyQt6.QtWidgets import (QWidget, QPushButton, QApplication, QFrame, QLabel, QLineEdit, QRadioButton, QMessageBox, QVBoxLayout,
+from PyQt6.QtWidgets import (QWidget, QPushButton, QApplication, QFrame, QLabel, QLineEdit, QFileDialog, QMessageBox, QVBoxLayout,
                              QMainWindow, QHBoxLayout, QCheckBox, QSpacerItem, QSizePolicy)
 
 
@@ -480,6 +480,7 @@ class MainMenuWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.addShopsWindow = None
+        self.addProductWindow = None
         self.setWhiteTheme()
         self.setWindowTitle("StockBalance - Инвентаризация склада магазинов")
         self.setGeometry(175, 75, start.WMax, start.HMax)
@@ -739,6 +740,7 @@ class MainMenuWindow(QMainWindow):
 
         self.container_shop_header.show()
     def on_but_shop_click(self, shop_id, shop_name):
+        self.current_shop_id = shop_id
         try:
             print(f"Нажата кнопка для магазина с ID: {shop_id}, {shop_name}")
             for widget_name in [
@@ -793,13 +795,13 @@ class MainMenuWindow(QMainWindow):
     def reload_but(self):
         self._build_shops_section()
         print("click reload_but")
+
     def product_shop(self, shop_id, shop_name):
         self.plus_product_btn = QPushButton("Добавить товар", self)
         self.plus_product_btn.setFixedSize(190, 50)
         self.plus_product_btn.setFont(start.font_Medium(12))
         self.plus_product_btn.setIcon(QIcon("ProjectImage/mainWin/Plus.svg"))
         self.plus_product_btn.setIconSize(QSize(34, 34))
-        self.plus_product_btn.setStyleSheet(start.base_style_button)
         self.plus_product_btn.setStyleSheet("""
             QPushButton {
                 border: 1px solid white;
@@ -808,8 +810,9 @@ class MainMenuWindow(QMainWindow):
         """)
         self.plus_product_btn.move(start.WMax - 250, 125)
         self.plus_product_btn.setCursor(Qt.CursorShape(13))
-        self.plus_product_btn.show()
+        self.plus_product_btn.clicked.connect(self.on_plus_product_btn_clicked)
 
+        self.plus_product_btn.show()
         self.container_text_header_product = QWidget(self)
         self.container_text_header_product.setFixedSize(400, 85)
         self.container_text_header_product.move(290, 125)
@@ -818,19 +821,24 @@ class MainMenuWindow(QMainWindow):
 
         head_text = QLabel(f"{shop_name}")
         head_text.setFont(start.font_Medium(28))
-        head_text.adjustSize()
         size_policy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         head_text.setSizePolicy(size_policy)
-        text_header_label_product.addWidget(head_text)
         text_header_label_product.addWidget(head_text)
 
         sub_text = QLabel(f"ID: {shop_id}")
         sub_text.setFont(start.font_Regular(12))
-        sub_text.setStyleSheet("""
-            color: #CACACA;
-        """)
+        sub_text.setStyleSheet("color: #CACACA;")
         text_header_label_product.addWidget(sub_text)
+
         self.container_text_header_product.show()
+
+    def on_plus_product_btn_clicked(self):
+        print("clicked plus_product_btn")
+        current_shop_id = self.current_shop_id
+        if self.addProductWindow is None or not self.addProductWindow.isVisible():
+            self.addProductWindow = AddProduct(parent=self, shop_id=current_shop_id)
+        self.addProductWindow.show()
+        self.addProductWindow.raise_()
 
 
 def _refresh_main_window(self):
@@ -840,6 +848,139 @@ def _refresh_main_window(self):
 
     central_widget.setLayout(layout)
     self.setCentralWidget(central_widget)
+
+class AddProduct(QMainWindow):
+    def __init__(self, parent=None, shop_id=None):
+        super().__init__(parent)
+        self.parent = parent
+        self.shop_id = shop_id
+        self.setWhiteTheme()
+        self.setWindowTitle("Добавить товар")
+        self.resize(550, 660)
+        self.setMinimumSize(550, 300)
+        self.setMaximumSize(550, 700)
+        self.setStyleSheet("background-color: #1C1C1C; color: white;")
+        central_widget = QWidget(self)
+        self.setCentralWidget(central_widget)
+        layout = QVBoxLayout(central_widget)
+        self._setup_ui(layout)
+    def setWhiteTheme(self):
+        self.setPalette(QApplication.instance().palette())
+    def _setup_ui(self, layout):
+        head_text_entrance = QLabel("Добавить товар", self)
+        head_text_entrance.setFont(start.font_Medium(28))
+        head_text_entrance.adjustSize()
+        head_text_entrance.move(115, 50)
+
+        self.sub_text_entrance = QLabel("Введите данные о товаре в поля\nниже: ", self)
+        self.sub_text_entrance.setFont(start.font_Regular(12))
+        self.sub_text_entrance.adjustSize()
+        self.sub_text_entrance.move(115, 120)
+
+        login_warn_text = QLabel("Пожалуйста, введите название на кириллице", self)
+        login_warn_text.setFont(start.font_Regular(10))
+        login_warn_text.move(115, 250)
+        login_warn_text.adjustSize()
+        login_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+
+        self.login_input_entrance = QLineEdit(self)
+        self.login_input_entrance.setPlaceholderText("Название товара")
+        self.login_input_entrance.setGeometry(115, 190, 310, 50)
+        self.login_input_entrance.setFont(start.font_Medium(28))
+        self.login_input_entrance.setStyleSheet(start.input_style)
+
+        self.remains_input_entrance = QLineEdit(self)
+        self.remains_input_entrance.setPlaceholderText("Начальное количество")
+        self.remains_input_entrance.setGeometry(115, 370, 310, 50)
+        self.remains_input_entrance.setFont(start.font_Medium(28))
+        self.remains_input_entrance.setStyleSheet(start.input_style)
+
+        login_warn_text = QLabel("Пример: 0 шт, 5 шт, 10 шт", self)
+        login_warn_text.setFont(start.font_Regular(10))
+        login_warn_text.move(115, 430)
+        login_warn_text.adjustSize()
+        login_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+
+        self.weight_input_entrance = QLineEdit(self)
+        self.weight_input_entrance.setPlaceholderText("Маркировка")
+        self.weight_input_entrance.setGeometry(115, 270, 310, 50)
+        self.weight_input_entrance.setFont(start.font_Medium(28))
+        self.weight_input_entrance.setStyleSheet(start.input_style)
+
+        login_warn_text = QLabel("Пример: 400 гр, 500 мл, 10 шт", self)
+        login_warn_text.setFont(start.font_Regular(10))
+        login_warn_text.move(115, 330)
+        login_warn_text.adjustSize()
+        login_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+
+        self.button_entrance = QPushButton("Добавить", self)
+        self.button_entrance.setFont(start.font_Regular(12))
+        self.button_entrance.setGeometry(170, 565, 200, 40)
+        self.button_entrance.setFont(start.font_Regular(12))
+        self.button_entrance.setCursor(Qt.CursorShape(13))
+        self.button_entrance.setStyleSheet("""
+                            QPushButton {
+                                background-color: #fff;
+                                color: rgb(15,15,15);
+                                text-align: center;
+                                border: none;
+                                padding: 10px 15px;
+                                border-radius: 20px;
+                            }
+                        """)
+        self.button_entrance.clicked.connect(self.on_button_entrance_click)
+
+        login_warn_text = QLabel("Изображение товара:", self)
+        login_warn_text.setFont(start.font_Regular(12))
+        login_warn_text.move(115, 465)
+        login_warn_text.adjustSize()
+        login_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+
+        self.btn_browse = QPushButton("Выбрать файл", self)
+        self.btn_browse.setGeometry(115, 500, 120, 35)
+        self.btn_browse.setFont(start.font_Regular(10))
+        self.btn_browse.clicked.connect(self.browse_file)
+        self.btn_browse.setStyleSheet("color: rgb(15,15,15); background-color: #fff;")
+
+        self.path_label = QLabel("Файл не выбран", self)
+        self.path_label.setStyleSheet("padding: 10px; background-color: none;")
+        self.path_label.setGeometry(235, 500, 600, 30)
+        self.path_label.adjustSize()
+
+    def on_button_entrance_click(self):
+        print("clicked on_button_entrance_click")
+        name = self.login_input_entrance.text()
+        weight = self.weight_input_entrance.text()
+        remains = self.remains_input_entrance.text()
+        image = self.path_label.text()
+        print(name, weight, remains, image, self.shop_id)
+        if name and weight and remains and "Файл не выбран" not in image:
+            QMessageBox.information(self, "Успех", "Магазин успешно добавлен!")
+            if self.parent and hasattr(self.parent, 'refresh_shops'):
+                self.parent.refresh_shops()
+            self.close()
+            login_user.add_product_to_shop(
+                name=name,
+                weight=weight,
+                remains=remains,
+                image=image,
+                shop_id=self.shop_id
+            )
+        else:
+            QMessageBox.warning(self, "Ошибка", "Вы заполнили не все поля")
+
+    def browse_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Выберите файл",
+            "",
+            "Изображения (*.jpg *.jpeg *.png)"
+        )
+        if file_path:
+            import os
+            file_name = os.path.basename(file_path)
+            self.path_label.setText(file_name)
+            print("Выбранный файл:", file_name)
 
 class AddShops(QMainWindow):
     def __init__(self, parent=None):
@@ -916,11 +1057,16 @@ class AddShops(QMainWindow):
                 return
             if has_cyrillic(name):
                 print(f"Сохранено: {name}")
-                login_user.addMag(name, generate_shop_id())
-                QMessageBox.information(self, "Успех", "Магазин успешно добавлен!")
-                if self.parent and hasattr(self.parent, 'refresh_shops'):
-                    self.parent.refresh_shops()
-                self.close()
+                shop_id = generate_shop_id()
+                login_user.addMag(name, shop_id)
+                l = login_user.create_shop_product_table(shop_id)
+                if l == True:
+                    QMessageBox.information(self, "Успех", "Магазин успешно добавлен!")
+                    if self.parent and hasattr(self.parent, 'refresh_shops'):
+                        self.parent.refresh_shops()
+                    self.close()
+                else:
+                    QMessageBox.warning(self, "Ошибка", "Возникла ошибка при добавлении магазина!")
             else:
                 QMessageBox.warning(self, "Ошибка", "Пожалуйста, используйте кириллицу!")
         except Exception as e:

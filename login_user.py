@@ -1,6 +1,7 @@
 import sqlite3
 import random
 import json
+import string
 
 def addUserDB(login, user_name, password):
     try:
@@ -110,4 +111,89 @@ def get_shops_by_user():
         return None
 
 
+def create_shop_product_table(shop_id):
+    db_path = "DataBase/Base/ProductShopDataBase.db"
+    with sqlite3.connect(db_path) as conn:
+        cursor = conn.cursor()
+        table_name = f'"{shop_id}"'
+        create_table_sql = f"""
+        CREATE TABLE IF NOT EXISTS {table_name} (
+            id_product      INTEGER PRIMARY KEY,
+            name_product   TEXT NOT NULL,
+            about_product  TEXT,
+            url_image_product TEXT,
+            price_product  REAL,
+            remains_product INTEGER,
+            weight_product REAL
+        );
+        """
 
+        cursor.execute(create_table_sql)
+        conn.commit()
+        return True
+
+
+def generate_id(length=12, digit_chance=0.4):
+    chars = string.ascii_lowercase
+    digits = string.digits
+
+    result = []
+    for _ in range(length):
+        if random.random() < digit_chance:
+            result.append(random.choice(digits))
+        else:
+            result.append(random.choice(chars))
+
+    return ''.join(result)
+
+
+def add_product_to_shop(name, weight, remains, image, shop_id):
+    db_path = "DataBase/Base/ProductShopDataBase.db"
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT name FROM sqlite_master 
+            WHERE type='table' AND name=?
+        """, (str(shop_id),))
+        table_exists = cursor.fetchone()
+
+        if not table_exists:
+            raise ValueError(f"Таблица с именем '{shop_id}' не найдена в базе данных.")
+        product_id = generate_id()
+
+        insert_query = f"""
+            INSERT INTO `{shop_id}` (
+                id_product,
+                name_product,
+                about_product,
+                url_image_product,
+                price_product,
+                remains_product,
+                weight_product
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        """
+
+
+        cursor.execute(insert_query, (
+            name,
+            int(product_id),
+            '0',
+            image,
+            0,
+            remains,
+            weight
+        ))
+
+        conn.commit()
+        print(f"Продукт '{name}' успешно добавлен в магазин {shop_id}. ID продукта: {product_id}")
+
+    except sqlite3.Error as e:
+        print(f"Ошибка работы с БД: {e}")
+        if conn:
+            conn.rollback()
+    except Exception as e:
+        print(f"Неожиданная ошибка: {e}")
+    finally:
+        if conn:
+            conn.close()
