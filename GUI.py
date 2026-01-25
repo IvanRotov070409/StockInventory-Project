@@ -8,9 +8,9 @@ import random
 import string
 from PyQt6.QtCore import Qt, QSize
 import configparser
-from PyQt6.QtGui import QPixmap, QIcon, QFont, QPalette, QColor
+from PyQt6.QtGui import QPixmap, QIcon, QTextOption, QPalette, QColor
 from PyQt6.QtWidgets import (QWidget, QPushButton, QApplication, QFrame, QLabel, QLineEdit, QFileDialog, QMessageBox, QVBoxLayout,
-                             QMainWindow, QHBoxLayout, QCheckBox, QSpacerItem, QSizePolicy)
+                             QMainWindow, QHBoxLayout, QCheckBox, QTextEdit, QSizePolicy, QRadioButton)
 
 
 
@@ -856,9 +856,8 @@ class AddProduct(QMainWindow):
         self.shop_id = shop_id
         self.setWhiteTheme()
         self.setWindowTitle("Добавить товар")
-        self.resize(550, 660)
-        self.setMinimumSize(550, 300)
-        self.setMaximumSize(550, 700)
+        self.resize(1000, 660)
+        self.setFixedSize(1000, 660)
         self.setStyleSheet("background-color: #1C1C1C; color: white;")
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
@@ -895,11 +894,11 @@ class AddProduct(QMainWindow):
         self.remains_input_entrance.setFont(start.font_Medium(28))
         self.remains_input_entrance.setStyleSheet(start.input_style)
 
-        login_warn_text = QLabel("Пример: 0 шт, 5 шт, 10 шт", self)
-        login_warn_text.setFont(start.font_Regular(10))
-        login_warn_text.move(115, 430)
-        login_warn_text.adjustSize()
-        login_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+        remains_warn_text = QLabel("Пример: 0 шт, 5 шт, 10 шт", self)
+        remains_warn_text.setFont(start.font_Regular(10))
+        remains_warn_text.move(115, 430)
+        remains_warn_text.adjustSize()
+        remains_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
 
         self.weight_input_entrance = QLineEdit(self)
         self.weight_input_entrance.setPlaceholderText("Маркировка")
@@ -907,15 +906,15 @@ class AddProduct(QMainWindow):
         self.weight_input_entrance.setFont(start.font_Medium(28))
         self.weight_input_entrance.setStyleSheet(start.input_style)
 
-        login_warn_text = QLabel("Пример: 400 гр, 500 мл, 10 шт", self)
-        login_warn_text.setFont(start.font_Regular(10))
-        login_warn_text.move(115, 330)
-        login_warn_text.adjustSize()
-        login_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+        weight_warn_text = QLabel("Пример: 400 гр, 500 мл, 10 шт", self)
+        weight_warn_text.setFont(start.font_Regular(10))
+        weight_warn_text.move(115, 330)
+        weight_warn_text.adjustSize()
+        weight_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
 
         self.button_entrance = QPushButton("Добавить", self)
         self.button_entrance.setFont(start.font_Regular(12))
-        self.button_entrance.setGeometry(170, 565, 200, 40)
+        self.button_entrance.setGeometry(400, 565, 200, 40)
         self.button_entrance.setFont(start.font_Regular(12))
         self.button_entrance.setCursor(Qt.CursorShape(13))
         self.button_entrance.setStyleSheet("""
@@ -930,21 +929,121 @@ class AddProduct(QMainWindow):
                         """)
         self.button_entrance.clicked.connect(self.on_button_entrance_click)
 
-        login_warn_text = QLabel("Изображение товара:", self)
-        login_warn_text.setFont(start.font_Regular(12))
-        login_warn_text.move(115, 465)
-        login_warn_text.adjustSize()
-        login_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+        self.price_input_entrance = QLineEdit(self)
+        self.price_input_entrance.setPlaceholderText("Цена")
+        self.price_input_entrance.setGeometry(115, 470, 310, 50)
+        self.price_input_entrance.setFont(start.font_Medium(28))
+        self.price_input_entrance.setStyleSheet(start.input_style)
+
+        price_warn_text = QLabel("Пример: 100 руб, 500 руб", self)
+        price_warn_text.setFont(start.font_Regular(10))
+        price_warn_text.move(115, 530)
+        price_warn_text.adjustSize()
+        price_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+
+        img_warn_text = QLabel("Изображение товара:", self)
+        img_warn_text.setFont(start.font_Regular(12))
+        img_warn_text.move(545, 465)
+        img_warn_text.adjustSize()
+        img_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+
+        type_warn_text = QLabel("Выберите тип:", self)
+        type_warn_text.setFont(start.font_Regular(12))
+        type_warn_text.move(545, 130)
+        type_warn_text.adjustSize()
+        type_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+
+        self.radio_no_mark = QRadioButton("Нет честного знака", self)
+        self.radio_yes_mark = QRadioButton("Есть честный знак", self)
+        self.radio_no_mark.setChecked(True)
+        self.radio_no_mark.setFont(start.font_Regular(12))
+        self.radio_yes_mark.setFont(start.font_Regular(12))
+        self.radio_no_mark.setCursor(Qt.CursorShape(13))
+        self.radio_yes_mark.setCursor(Qt.CursorShape(13))
+
+        # self.radio_no_mark.toggled.connect(self.on_mark_type_changed)
+        # self.radio_yes_mark.toggled.connect(self.on_mark_type_changed)
+        radio_layout = QVBoxLayout()
+        radio_layout.addWidget(self.radio_no_mark)
+        radio_layout.addWidget(self.radio_yes_mark)
+
+        radio_widget = QWidget(self)
+        radio_widget.setLayout(radio_layout)
+        radio_widget.move(545, 170)
+        radio_widget.setFixedSize(200, 60)
+        self.radio_no_mark.setStyleSheet("""
+            QRadioButton {
+                color: #fff;
+            }
+            QRadioButton::indicator {
+                left: 1px;
+                width: 10px;
+                height: 10px; 
+                border-radius: 6px; 
+                background-color: none; 
+                border: 1px solid #fff; 
+            }
+            QRadioButton::indicator:checked {
+                left: 1px;
+                background-color: none;
+                border: 3px solid #fff;
+                width: 7px;
+                height: 7px;
+                border-radius: 6px;
+            }
+        """)
+        self.radio_yes_mark.setStyleSheet("""
+            QRadioButton {
+                color: #fff;
+            }
+            QRadioButton::indicator {
+                left: 1px;
+                width: 10px;
+                height: 10px;
+                border-radius: 6px;
+                background-color: none;
+                border: 1px solid #fff;
+            }
+            QRadioButton::indicator:checked {
+                left: 1px;
+                background-color: none;
+                border: 3px solid #fff;
+                width: 7px;
+                height: 7px;
+                border-radius: 6px;
+            }
+        """)
+
+        self.about_input_entrance = QTextEdit(self)
+        self.about_input_entrance.setPlaceholderText("Описание")
+        self.about_input_entrance.setGeometry(545, 260, 310, 170)
+        self.about_input_entrance.setFont(start.font_Medium(12))
+        self.about_input_entrance.setStyleSheet("""
+            QTextEdit {
+                border-radius: 10px;
+                padding: 8px;
+                background-color: #222;
+            }
+            QTextEdit::placeholder {
+                color: #888;
+                    
+                border: 1px solid 1px;
+                margin-top: -2px;
+                border-radius: 10px;
+            }
+        """)
+        self.about_input_entrance.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         self.btn_browse = QPushButton("Выбрать файл", self)
-        self.btn_browse.setGeometry(115, 500, 120, 35)
+        self.btn_browse.setGeometry(545, 500, 120, 35)
         self.btn_browse.setFont(start.font_Regular(10))
         self.btn_browse.clicked.connect(self.browse_file)
         self.btn_browse.setStyleSheet("color: rgb(15,15,15); background-color: #fff;")
+        self.btn_browse.setCursor(Qt.CursorShape(13))
 
         self.path_label = QLabel("Файл не выбран", self)
         self.path_label.setStyleSheet("padding: 10px; background-color: none;")
-        self.path_label.setGeometry(235, 500, 600, 30)
+        self.path_label.setGeometry(665, 500, 600, 30)
         self.path_label.adjustSize()
 
     def on_button_entrance_click(self):
