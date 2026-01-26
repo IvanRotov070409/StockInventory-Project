@@ -7,10 +7,11 @@ import login_user
 import random
 import string
 from PyQt6.QtCore import Qt, QSize
-import configparser
+from pathlib import Path
+import shutil
 from PyQt6.QtGui import QPixmap, QIcon, QTextOption, QPalette, QColor
 from PyQt6.QtWidgets import (QWidget, QPushButton, QApplication, QFrame, QLabel, QLineEdit, QFileDialog, QMessageBox, QVBoxLayout,
-                             QMainWindow, QHBoxLayout, QCheckBox, QTextEdit, QSizePolicy, QRadioButton)
+                             QMainWindow, QHBoxLayout, QCheckBox, QTextEdit, QSizePolicy, QRadioButton, QScrollArea)
 
 
 
@@ -138,8 +139,8 @@ class MainWindow(QWidget):
                 padding: 10px 15px;
             }
         """)
-        button_entrance.clicked.connect(self.on_button_entrance_clicked)
         button_question.clicked.connect(self.on_button_question_clicked)
+        button_entrance.clicked.connect(self.on_button_entrance_clicked)
         button_reg.clicked.connect(self.on_button_reg_clicked)
 
     def on_button_question_clicked(self):
@@ -268,6 +269,7 @@ class RegWindow(QWidget):
                 msg_box.setText("Пароль или почта не должен содержать кириллицу")
                 msg_box.setWindowTitle("Оповещение")
                 msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+
                 msg_box.exec()
                 self.password_input.clear()
                 self.repeat_password_input.clear()
@@ -494,6 +496,16 @@ class MainMenuWindow(QMainWindow):
     def Main(self):
         self._build_shops_section()
         def fix_info():
+            image_logo = "ProjectImage/regMainWin/Indust_logo-png.png"
+            with open(image_logo):
+                image_logo_label = QLabel(self)
+                image_logo_label.move(25, 0)
+                image_logo_label.setFixedSize(200, 75)
+                image_label_pix = QPixmap(image_logo)
+                scaled_logo = image_label_pix.scaled(200, 75, Qt.AspectRatioMode.KeepAspectRatio,
+                                                     Qt.TransformationMode.SmoothTransformation)
+                image_logo_label.setPixmap(scaled_logo)
+
             with open('assets/user.json', 'r') as file:
                 data = json.load(file)
             user_name = data.get("name")
@@ -574,6 +586,10 @@ class MainMenuWindow(QMainWindow):
                     font-weight: 500;
                 }
             """)
+
+        fix_info()
+
+        def shop_win():
             button_question_main = QPushButton("Есть вопросы?", self)
             button_question_main.setFont(start.font_Regular(12))
             button_question_main.setFixedSize(150, 40)
@@ -584,10 +600,6 @@ class MainMenuWindow(QMainWindow):
             button_question_main.setStyleSheet(start.base_style_button)
             button_question_main.clicked.connect(self.on_button_question_main_clicked)
 
-        fix_info()
-
-        def shop_win():
-            # Кнопка перезагрузки
             self.reload_but_btn = QPushButton("", self)
             self.reload_but_btn.setFixedSize(40, 40)
             self.reload_but_btn.move(start.WMax - 165, 190)
@@ -683,12 +695,10 @@ class MainMenuWindow(QMainWindow):
             container_layout.setContentsMargins(10, 10, 10, 10)
             shop_container.setLayout(container_layout)
 
-            # Создаем горизонтальный макет для информации и кнопки
             info_layout = QHBoxLayout()
             info_layout.setContentsMargins(0, 0, 0, 0)
             info_layout.setSpacing(10)
 
-            # Макет для информации о магазине
             info_widget = QWidget()
             info_widget.setStyleSheet("border: none;")
             info_layout_inner = QVBoxLayout()
@@ -706,11 +716,10 @@ class MainMenuWindow(QMainWindow):
 
             info_layout.addWidget(info_widget, 1)
 
-            # Кнопка справа
             id_but = QPushButton("Открыть →", self)
             id_but.setFont(start.font_Regular(11))
             id_but.setCursor(Qt.CursorShape.PointingHandCursor)
-            id_but.setObjectName(f"{shop['shop_id']}")  # Сохраняем ID в objectName
+            id_but.setObjectName(f"{shop['shop_id']}")
             id_but.setFixedSize(125, 35)
             id_but.setStyleSheet("""
                 QPushButton {
@@ -722,8 +731,6 @@ class MainMenuWindow(QMainWindow):
                     border-radius: 17px;
                 }
             """)
-
-            # Используем лямбду для передачи ID
             id_but.clicked.connect(lambda checked, shop_id=shop['shop_id'], shop_name=shop['name']: self.on_but_shop_click(shop_id, shop_name))
 
             info_layout.addWidget(id_but, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
@@ -739,23 +746,28 @@ class MainMenuWindow(QMainWindow):
             main_vbox.addLayout(row)
 
         self.container_shop_header.show()
+
+    def hide_shops_section(self):
+        widgets_to_hide = [
+            'container_shop_header',
+            'reload_but_btn',
+            'layout_but_2_btn',
+            'layout_but_4_btn',
+            'container_text_header',
+            'plus_mag_btn'
+        ]
+        for widget_name in widgets_to_hide:
+            if hasattr(self, widget_name) and getattr(self, widget_name):
+                getattr(self, widget_name).hide()
+
     def on_but_shop_click(self, shop_id, shop_name):
         self.current_shop_id = shop_id
         try:
             print(f"Нажата кнопка для магазина с ID: {shop_id}, {shop_name}")
-            for widget_name in [
-                'reload_but_btn',
-                'layout_but_2_btn',
-                'layout_but_4_btn',
-                'container_text_header',
-                'plus_mag_btn'
-            ]:
-                if hasattr(self, widget_name):
-                    getattr(self, widget_name).hide()
-            if hasattr(self, 'container_shop_header'):
-                self.container_shop_header.hide()
-            if hasattr(self, 'shop_win_widget'):
-                self.shop_win_widget.deleteLater()
+            self.hide_shops_section()
+            if hasattr(self, 'container_shop_header') and self.container_shop_header:
+                self.container_shop_header.deleteLater()
+                self.container_shop_header = None
             self.product_shop(shop_id, shop_name)
 
         except Exception as e:
@@ -832,6 +844,8 @@ class MainMenuWindow(QMainWindow):
 
         self.container_text_header_product.show()
 
+        self._build_products_section(shop_id)
+
     def on_plus_product_btn_clicked(self):
         print("clicked plus_product_btn")
         current_shop_id = self.current_shop_id
@@ -839,6 +853,149 @@ class MainMenuWindow(QMainWindow):
             self.addProductWindow = AddProduct(parent=self, shop_id=current_shop_id)
         self.addProductWindow.show()
         self.addProductWindow.raise_()
+
+    def _build_products_section(self, shop_id):
+        result = login_user.get_products_by_shop(shop_id)
+        products = result["products"]
+        if not products:
+            QMessageBox.information(self, "Информация", "В этом магазине нет товаров.")
+            return
+
+        if hasattr(self, 'container_products_header') and self.container_products_header:
+            self.container_products_header.deleteLater()
+
+        self.container_products_header = QScrollArea(self)
+        self.container_products_header.setFixedSize(900, 400)
+        self.container_products_header.move(290, 220)
+        self.container_products_header.setWidgetResizable(True)
+        self.container_products_header.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.container_products_header.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+        self.container_products_header.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+            }
+        """)
+        scroll_contents = QWidget()
+        main_vbox = QVBoxLayout(scroll_contents)
+        main_vbox.setContentsMargins(0, 0, 0, 0)
+
+        rows = []
+
+        for i, product in enumerate(products):
+            product_card = QWidget()
+            product_card.setObjectName("product_card")
+            product_card.setStyleSheet("""
+                #product_card {
+                    border-radius: 12px;
+                    background-color: transparent;
+                    border: 1px solid #e0e0e0;
+                }
+            """)
+            card_layout = QVBoxLayout()
+            card_layout.setContentsMargins(15, 15, 15, 15)
+            card_layout.setSpacing(20)
+            card_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+            product_card.setLayout(card_layout)
+            if product.get("image"):
+                pixmap = QPixmap(product["image"])
+                if not pixmap.isNull():
+                    label_img = QLabel()
+                    scaled = pixmap.scaled(100, 100, Qt.AspectRatioMode.KeepAspectRatio,
+                                           Qt.TransformationMode.SmoothTransformation)
+                    label_img.setPixmap(scaled)
+                    label_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                    card_layout.addWidget(label_img)
+            else:
+                label_img = QLabel("Нет изображения")
+                label_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                label_img.setStyleSheet("color: #888;")
+                card_layout.addWidget(label_img)
+
+            name_label = QLabel(f"<b>{product['name']}</b>")
+            name_label.setFont(start.font_Medium(14))
+            name_label.setWordWrap(True)
+            card_layout.addWidget(name_label)
+
+            weight_label = QLabel(f"Маркировка: {product.get('weight', '—')}")
+            weight_label.setFont(start.font_Regular(10))
+            weight_label.setStyleSheet("color: #AAA;")
+            card_layout.addWidget(weight_label)
+
+            remains_label = QLabel(f"Остаток: {product.get('remains', '0')} шт.")
+            remains_label.setFont(start.font_Regular(10))
+            remains_label.setStyleSheet("color: #AAA;")
+            card_layout.addWidget(remains_label)
+
+            edit_btn = QPushButton("Редактировать", self)
+            edit_btn.setFont(start.font_Regular(9))
+            edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            edit_btn.setFixedHeight(25)
+            edit_btn.setStyleSheet("""
+`           QPushButton
+                {
+                    background-color:  #505050;
+                    color: white;
+                    border-radius: 8px;
+                    padding: 3px 10px;
+                }
+            QPushButton: hover
+                {
+                    background-color: #606060;
+                }
+            """)
+            edit_btn.clicked.connect(
+                lambda checked, p_id=product['product_id']: self.on_edit_product_clicked(p_id, shop_id)
+            )
+            card_layout.addWidget(edit_btn, alignment=Qt.AlignmentFlag.AlignRight)
+            if i % 3 == 0:
+                current_row = QHBoxLayout()
+                current_row.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+                rows.append(current_row)
+
+            product_card.setFixedWidth(280)
+            current_row.addWidget(product_card)
+        for row in rows:
+            widget_count = row.count()
+            for _ in range(3 - widget_count):
+                row.addStretch(1)
+        for row in rows:
+            main_vbox.addLayout(row)
+        self.container_products_header.setWidget(scroll_contents)
+
+        self.container_products_header.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: none;
+                width: 12px;
+                margin: 0px 0px 0px 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #4d4d4d;
+                min-height: 30px;
+                border-radius: 10px;
+                margin: 2px 2px 2px 2px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #a0a0a0;
+            }
+            QScrollBar::add-line:vertical,
+            QScrollBar::sub-line:vertical,
+            QScrollBar::add-page:vertical,
+            QScrollBar::sub-page:vertical {
+                height: 0px;
+                width: 0px;
+                margin: 0px;
+                border: none;
+                background: none;
+            }
+        """)
+        self.container_products_header.show()
 
 
 def _refresh_main_window(self):
@@ -854,6 +1011,7 @@ class AddProduct(QMainWindow):
         super().__init__(parent)
         self.parent = parent
         self.shop_id = shop_id
+        self.selected_image_path = None
         self.setWhiteTheme()
         self.setWindowTitle("Добавить товар")
         self.resize(1000, 660)
@@ -1048,23 +1206,37 @@ class AddProduct(QMainWindow):
 
     def on_button_entrance_click(self):
         print("clicked on_button_entrance_click")
+
         name = self.login_input_entrance.text()
         weight = self.weight_input_entrance.text()
         remains = self.remains_input_entrance.text()
+        about = self.about_input_entrance.toPlainText()
+        price = self.price_input_entrance.text()
         image = self.path_label.text()
-        print(name, weight, remains, image, self.shop_id)
+        barcode = None
+        if self.radio_no_mark.isChecked():
+            barcode = "Нет честного знака"
+        elif self.radio_yes_mark.isChecked():
+            barcode = "Есть честный знак"
+        if not self.selected_image_path:
+            QMessageBox.warning(self, "Ошибка", "Не выбран файл изображения!")
+            return
+        image_save = self.selected_image_path
         if name and weight and remains and "Файл не выбран" not in image:
-            QMessageBox.information(self, "Успех", "Магазин успешно добавлен!")
-            if self.parent and hasattr(self.parent, 'refresh_shops'):
-                self.parent.refresh_shops()
-            self.close()
-            login_user.add_product_to_shop(
+            add_product = login_user.add_product_to_shop(
                 name=name,
                 weight=weight,
                 remains=remains,
                 image=image,
-                shop_id=self.shop_id
+                shop_id=self.shop_id,
+                about=about,
+                barcode=barcode,
+                price=price
             )
+            print(add_product)
+            save_file_with_pathlib(image_save, f"DataBase/ImageProduct/{add_product}/", image)
+            QMessageBox.information(self, "Успех", "Товар успешно добавлен!")
+            self.close()
         else:
             QMessageBox.warning(self, "Ошибка", "Вы заполнили не все поля")
 
@@ -1076,17 +1248,33 @@ class AddProduct(QMainWindow):
             "Изображения (*.jpg *.jpeg *.png)"
         )
         if file_path:
-            import os
             file_name = os.path.basename(file_path)
             self.path_label.setText(file_name)
-            print("Выбранный файл:", file_name)
+            self.selected_image_path = file_path
+            print("Выбранный файл (полный путь):", self.selected_image_path)
 
+
+    def on_edit_product_clicked(self, product_id, shop_id):
+        print(f"Редактирование товара ID={product_id} в магазине ID={shop_id}")
+        # edit_window = EditProductWindow(product_id, shop_id, parent=self)
+        # edit_window.show()
+
+
+def save_file_with_pathlib(source_path, target_dir, target_name=None):
+    source = Path(source_path)
+    target_dir = Path(target_dir)
+    target_dir.mkdir(parents=True, exist_ok=True)
+    if target_name is None:
+        target_name = source.name
+    target = target_dir / target_name
+    shutil.copy2(source, target)
+    print(f"Файл сохранён: {target}")
+    return str(target)
 class AddShops(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
         self.setWhiteTheme()
-        # Настройки окна
         self.setWindowTitle("Добавить магазин")
         self.resize(550, 400)
         self.setMinimumSize(550, 300)
@@ -1161,8 +1349,6 @@ class AddShops(QMainWindow):
                 l = login_user.create_shop_product_table(shop_id)
                 if l == True:
                     QMessageBox.information(self, "Успех", "Магазин успешно добавлен!")
-                    if self.parent and hasattr(self.parent, 'refresh_shops'):
-                        self.parent.refresh_shops()
                     self.close()
                 else:
                     QMessageBox.warning(self, "Ошибка", "Возникла ошибка при добавлении магазина!")

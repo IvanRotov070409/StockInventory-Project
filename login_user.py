@@ -1,7 +1,8 @@
 import sqlite3
 import random
 import json
-import string
+import re
+import uuid
 
 def addUserDB(login, user_name, password):
     try:
@@ -129,19 +130,107 @@ def create_shop_product_table(shop_id):
         return True
 
 
-def generate_id(length=12, digit_chance=0.4):
-    chars = string.ascii_lowercase
-    digits = string.digits
+def generate_id():
+    return str(uuid.uuid4())[:8]
 
-    result = []
-    for _ in range(length):
-        if random.random() < digit_chance:
-            result.append(random.choice(digits))
-        else:
-            result.append(random.choice(chars))
+def add_product_to_shop(name, weight, remains, image, shop_id, about, barcode, price):
+    clean_shop_id = re.sub(r'[^a-zA-Z0-9_]', '', shop_id)
+    conn = sqlite3.connect('DataBase/Base/ProductShopDataBase.db')
+    cursor = conn.cursor()
+    try:
+        create_table_query = f'''
+        CREATE TABLE IF NOT EXISTS "{clean_shop_id}" (
+            id_product TEXT,
+            name_product TEXT,
+            about_product TEXT,
+            url_image_product TEXT,
+            price_product TEXT,
+            remains_product TEXT,
+            weight_product TEXT,
+            barcode_product TEXT
+        )
+        '''
+        cursor.execute(create_table_query)
+        id_product = generate_id()
+        data = (
+            str(id_product),
+            str(name),
+            str(about),
+            str(image),
+            str(price),
+            str(remains),
+            str(weight),
+            str(barcode)
+        )
+        insert_query = f'''
+        INSERT INTO "{clean_shop_id}" (
+            id_product,
+            name_product,
+            about_product,
+            url_image_product,
+            price_product,
+            remains_product,
+            weight_product,
+            barcode_product
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        '''
+        cursor.execute(insert_query, data)
+        conn.commit()
+        print(f"Продукт с ID {id_product} успешно добавлен в таблицу {clean_shop_id}!")
+        return id_product
+    except:
+        conn.rollback()
+    finally:
+        conn.close()
 
-    return ''.join(result)
 
+def get_products_by_shop(shop_id):
+    conn = None
+    clean_shop_id = re.sub(r'[^a-zA-Z0-9_]', '', shop_id)
 
-def add_product_to_shop(name, weight, remains, image, shop_id):
-    pass
+    try:
+        conn = sqlite3.connect('DataBase/Base/ProductShopDataBase.db')
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (clean_shop_id,))
+        if cursor.fetchone() is None:
+            return None
+        query = f"""
+            SELECT
+                id_product,
+                name_product,
+                about_product,
+                url_image_product,
+                price_product,
+                remains_product,
+                weight_product,
+                barcode_product
+            FROM "{clean_shop_id}"
+            ORDER BY name_product;
+        """
+
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+        products = []
+        for row in rows:
+            product = {
+                "product_id": row["id_product"],
+                "name": row["name_product"],
+                "about": row["about_product"],
+                "image": row["url_image_product"],
+                "price": row["price_product"],
+                "remains": row["remains_product"],
+                "weight": row["weight_product"],
+                "barcode": row["barcode_product"]
+            }
+            products.append(product)
+
+        return {"products": products}
+
+    except:
+        return None
+    finally:
+        if conn:
+            conn.close()
+
