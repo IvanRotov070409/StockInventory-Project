@@ -495,185 +495,228 @@ class MainMenuWindow(QMainWindow):
         self.setPalette(QApplication.instance().palette())
     def Main(self):
         self._build_shops_section()
-        def fix_info():
-            image_logo = "ProjectImage/regMainWin/Indust_logo-png.png"
-            with open(image_logo):
-                image_logo_label = QLabel(self)
-                image_logo_label.move(25, 0)
-                image_logo_label.setFixedSize(200, 75)
-                image_label_pix = QPixmap(image_logo)
-                scaled_logo = image_label_pix.scaled(200, 75, Qt.AspectRatioMode.KeepAspectRatio,
-                                                     Qt.TransformationMode.SmoothTransformation)
-                image_logo_label.setPixmap(scaled_logo)
+        self.fix_info()
+        self.shop_win()
+    def fix_info(self):
+        head_left = QWidget(self)
+        head_left.setGeometry(0, 0, 270, 750)
+        layout = QVBoxLayout(head_left)
 
-            with open('assets/user.json', 'r') as file:
-                data = json.load(file)
-            user_name = data.get("name")
-            result = login_user.get_shops_by_user()
-            container = QWidget(self)
-            container.setFixedSize(250, 60)
-            container.move(start.WMax - 330, 10)
-            container.show()
+        layout.setContentsMargins(20, 15, 10, 10)
+        layout.setSpacing(15)
 
-            main_layout = QHBoxLayout()
-            container.setLayout(main_layout)
+        image_logo = "ProjectImage/regMainWin/Indust_logo-png.png"
+        image_label_pix = QPixmap(image_logo)
 
-            vertical_layout = QVBoxLayout()
-            user_hud = QLabel(f"<b>{user_name}</b>")
-            user_hud.setFont(start.font_Medium(12))
-            vertical_layout.addWidget(user_hud)
+        scaled_logo = image_label_pix.scaled(
+            200, 75,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
 
-            state = QLabel("Главный менеджер")
-            state.setFont(start.font_Regular(10))
-            vertical_layout.addWidget(state)
+        logo_label = QLabel()
+        logo_label.setPixmap(scaled_logo)
+        logo_label.setFixedSize(200, 50)
+        layout.addWidget(logo_label, alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
 
-            button = QPushButton()
-            button.setIcon(QIcon("ProjectImage/mainWin/user_icon.svg"))
-            button.setFixedSize(50, 32)
-            button.setIconSize(QSize(32, 32))
-            button.setStyleSheet("""
-                QPushButton {
-                    text-align: center;
-                    border: none;
-                    border-radius: 20px;
-                }
-            """)
+        button_exit = QPushButton("   Выход")
+        button_exit.setFont(start.font_Medium(12))
+        button_exit.setFixedSize(150, 100)
+        button_exit.setIcon(QIcon("ProjectImage/regMainWin/entrance2.svg"))
+        button_exit.setIconSize(QSize(22, 22))
+        button_exit.setCursor(Qt.CursorShape(13))
 
-            main_layout.addWidget(button)
-            main_layout.addLayout(vertical_layout)
-            main_layout.setStretch(0, 1)
-            main_layout.setStretch(1, 2)
+        button_exit.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                border: none;
+                font-weight: 500;
+                padding-left: 10px;
+            }
+        """)
+        layout.addWidget(button_exit, alignment=Qt.AlignmentFlag.AlignLeft)
+
+        head_left.setStyleSheet("""
+            QWidget {
+                background-color: transparent;
+                border-right: 1px solid #FFF;
+                border-top-right-radius: 4px;
+                border-bottom-right-radius: 4px;
+            }
+            QLabel {
+                background-color: transparent;
+                border: none;
+            }
+        """)
+
+        with open('assets/user.json', 'r') as file:
+            data = json.load(file)
+        user_name = data.get("name")
+        result = login_user.get_shops_by_user()
+        container = QWidget(self)
+        container.setFixedSize(250, 60)
+        container.move(start.WMax - 330, 10)
+        container.show()
+
+        main_layout = QHBoxLayout()
+        container.setLayout(main_layout)
+
+        vertical_layout = QVBoxLayout()
+        user_hud = QLabel(f"<b>{user_name}</b>")
+        user_hud.setFont(start.font_Medium(12))
+        vertical_layout.addWidget(user_hud)
+
+        state = QLabel("Главный менеджер")
+        state.setFont(start.font_Regular(10))
+        vertical_layout.addWidget(state)
+
+        button = QPushButton()
+        button.setIcon(QIcon("ProjectImage/mainWin/user_icon.svg"))
+        button.setFixedSize(50, 32)
+        button.setIconSize(QSize(32, 32))
+        button.setStyleSheet("""
+            QPushButton {
+                text-align: center;
+                border: none;
+                border-radius: 20px;
+            }
+        """)
+
+        main_layout.addWidget(button)
+        main_layout.addLayout(vertical_layout)
+        main_layout.setStretch(0, 1)
+        main_layout.setStretch(1, 2)
 
 
-            settings_button = QPushButton("", self)
-            settings_button.setFixedSize(50, 50)
-            settings_button.move(start.WMax - 130, 20)
-            settings_button.setIcon(QIcon("ProjectImage/mainWin/Settings.svg"))
-            settings_button.setIconSize(QSize(20, 20))
-            settings_button.setStyleSheet("""
-                QPushButton {
-                    border-radius: 8px;
-                }
-            """)
-            settings_button.setCursor(Qt.CursorShape(13))
-            settings_button.clicked.connect(self.on_settings_clicked)
-            exit_button = QPushButton("", self)
-            exit_button.setFixedSize(50, 50)
-            exit_button.move(start.WMax - 80, 20)
-            exit_button.setIcon(QIcon("ProjectImage/mainWin/Exit.svg"))
-            exit_button.setIconSize(QSize(20, 20))
-            exit_button.setStyleSheet("""
-                QPushButton {
-                    border-radius: 8px;
-                }
-            """)
-            exit_button.setCursor(Qt.CursorShape(13))
+        settings_button = QPushButton("", self)
+        settings_button.setFixedSize(50, 50)
+        settings_button.move(start.WMax - 130, 20)
+        settings_button.setIcon(QIcon("ProjectImage/mainWin/Settings.svg"))
+        settings_button.setIconSize(QSize(20, 20))
+        settings_button.setStyleSheet("""
+            QPushButton {
+                border-radius: 8px;
+            }
+        """)
+        settings_button.setCursor(Qt.CursorShape(13))
+        settings_button.clicked.connect(self.on_settings_clicked)
+        exit_button = QPushButton("", self)
+        exit_button.setFixedSize(50, 50)
+        exit_button.move(start.WMax - 80, 20)
+        exit_button.setIcon(QIcon("ProjectImage/mainWin/Exit.svg"))
+        exit_button.setIconSize(QSize(20, 20))
+        exit_button.setStyleSheet("""
+            QPushButton {
+                border-radius: 8px;
+            }
+        """)
+        exit_button.setCursor(Qt.CursorShape(13))
 
-            exit_button.clicked.connect(self.on_exit_clicked)
+        exit_button.clicked.connect(self.on_exit_clicked)
 
-            help_button = QPushButton("", self)
-            help_button.setText("Поддержка")
-            help_button.setFont(start.font_Regular(12))
-            help_button.move(300, 25)
-            help_button.setFixedSize(150, 40)
-            help_button.setCursor(Qt.CursorShape(13))
-            help_button.setIcon(QIcon("ProjectImage/mainWin/help.svg"))
-            help_button.setIconSize(QSize(30, 30))
-            help_button.setStyleSheet("""
-                QPushButton {
-                    border-radius: 10px;
-                    border: 1.2px solid white;
-                    font-weight: 500;
-                }
-            """)
+        help_button = QPushButton("", self)
+        help_button.setText("Поддержка")
+        help_button.setFont(start.font_Regular(12))
+        help_button.move(300, 25)
+        help_button.setFixedSize(150, 40)
+        help_button.setCursor(Qt.CursorShape(13))
+        help_button.setIcon(QIcon("ProjectImage/mainWin/help.svg"))
+        help_button.setIconSize(QSize(30, 30))
+        help_button.setStyleSheet("""
+            QPushButton {
+                border-radius: 10px;
+                border: 1.2px solid white;
+                font-weight: 500;
+            }
+        """)
+        pass
 
-        fix_info()
+    def shop_win(self):
+        button_question_main = QPushButton("Есть вопросы?", self)
+        button_question_main.setFont(start.font_Regular(12))
+        button_question_main.setFixedSize(150, 40)
+        button_question_main.move(1020, 630)
+        button_question_main.setIcon(QIcon("ProjectImage/regMainWin/question.svg"))
+        button_question_main.setIconSize(QSize(26, 26))
+        button_question_main.setCursor(Qt.CursorShape(13)),
+        button_question_main.setStyleSheet(start.base_style_button)
+        button_question_main.clicked.connect(self.on_button_question_main_clicked)
 
-        def shop_win():
-            button_question_main = QPushButton("Есть вопросы?", self)
-            button_question_main.setFont(start.font_Regular(12))
-            button_question_main.setFixedSize(150, 40)
-            button_question_main.move(1020, 630)
-            button_question_main.setIcon(QIcon("ProjectImage/regMainWin/question.svg"))
-            button_question_main.setIconSize(QSize(26, 26))
-            button_question_main.setCursor(Qt.CursorShape(13)),
-            button_question_main.setStyleSheet(start.base_style_button)
-            button_question_main.clicked.connect(self.on_button_question_main_clicked)
+        self.reload_but_btn = QPushButton("", self)
+        self.reload_but_btn.setFixedSize(40, 40)
+        self.reload_but_btn.move(start.WMax - 165, 190)
+        self.reload_but_btn.setIcon(QIcon("ProjectImage/mainWin/reload.svg"))
+        self.reload_but_btn.setIconSize(QSize(20, 20))
+        self.reload_but_btn.setCursor(Qt.CursorShape(13))
+        self.reload_but_btn.setStyleSheet("""
+            QPushButton {
+                border-radius: 15px;
+                background-color: #242424;
+            }
+        """)
+        self.reload_but_btn.clicked.connect(self.reload_but)
+        self.reload_but_btn.show()
 
-            self.reload_but_btn = QPushButton("", self)
-            self.reload_but_btn.setFixedSize(40, 40)
-            self.reload_but_btn.move(start.WMax - 165, 190)
-            self.reload_but_btn.setIcon(QIcon("ProjectImage/mainWin/reload.svg"))
-            self.reload_but_btn.setIconSize(QSize(20, 20))
-            self.reload_but_btn.setCursor(Qt.CursorShape(13))
-            self.reload_but_btn.setStyleSheet("""
-                QPushButton {
-                    border-radius: 15px;
-                    background-color: #242424;
-                }
-            """)
-            self.reload_but_btn.clicked.connect(self.reload_but)
-            self.reload_but_btn.show()
+        # Кнопка layout_but_2
+        self.layout_but_2_btn = QPushButton("", self)
+        self.layout_but_2_btn.move(880, 190)
+        self.layout_but_2_btn.setFixedSize(QSize(40, 40))
+        self.layout_but_2_btn.setIcon(QIcon("ProjectImage/mainWin/layout_but_2.svg"))
+        self.layout_but_2_btn.setIconSize(QSize(26, 26))
+        self.layout_but_2_btn.setCursor(Qt.CursorShape(13))
+        self.layout_but_2_btn.setStyleSheet(start.base_style_button)
+        self.layout_but_2_btn.clicked.connect(self.on_button_layout2_main_clicked)
+        self.layout_but_2_btn.show()
 
-            # Кнопка layout_but_2
-            self.layout_but_2_btn = QPushButton("", self)
-            self.layout_but_2_btn.move(880, 190)
-            self.layout_but_2_btn.setFixedSize(QSize(40, 40))
-            self.layout_but_2_btn.setIcon(QIcon("ProjectImage/mainWin/layout_but_2.svg"))
-            self.layout_but_2_btn.setIconSize(QSize(26, 26))
-            self.layout_but_2_btn.setCursor(Qt.CursorShape(13))
-            self.layout_but_2_btn.setStyleSheet(start.base_style_button)
-            self.layout_but_2_btn.clicked.connect(self.on_button_layout2_main_clicked)
-            self.layout_but_2_btn.show()
+        self.layout_but_4_btn = QPushButton("", self)
+        self.layout_but_4_btn.move(940, 190)
+        self.layout_but_4_btn.setFixedSize(QSize(40, 40))
+        self.layout_but_4_btn.setIcon(QIcon("ProjectImage/mainWin/layout_but_4.svg"))
+        self.layout_but_4_btn.setIconSize(QSize(26, 26))
+        self.layout_but_4_btn.setCursor(Qt.CursorShape(13))
+        self.layout_but_4_btn.setStyleSheet(start.base_style_button)
+        self.layout_but_4_btn.clicked.connect(self.on_button_layout4_main_clicked)
+        self.layout_but_4_btn.show()
 
-            self.layout_but_4_btn = QPushButton("", self)
-            self.layout_but_4_btn.move(940, 190)
-            self.layout_but_4_btn.setFixedSize(QSize(40, 40))
-            self.layout_but_4_btn.setIcon(QIcon("ProjectImage/mainWin/layout_but_4.svg"))
-            self.layout_but_4_btn.setIconSize(QSize(26, 26))
-            self.layout_but_4_btn.setCursor(Qt.CursorShape(13))
-            self.layout_but_4_btn.setStyleSheet(start.base_style_button)
-            self.layout_but_4_btn.clicked.connect(self.on_button_layout4_main_clicked)
-            self.layout_but_4_btn.show()
+        self.container_text_header = QWidget(self)
+        self.container_text_header.setFixedSize(200, 125)
+        self.container_text_header.move(290, 125)
+        text_header_label = QVBoxLayout()
+        self.container_text_header.setLayout(text_header_label)
 
-            self.container_text_header = QWidget(self)
-            self.container_text_header.setFixedSize(200, 125)
-            self.container_text_header.move(290, 125)
-            text_header_label = QVBoxLayout()
-            self.container_text_header.setLayout(text_header_label)
+        head_text = QLabel("Главная")
+        head_text.setFont(start.font_Medium(30))
+        head_text.adjustSize()
+        text_header_label.addWidget(head_text)
 
-            head_text = QLabel("Главная")
-            head_text.setFont(start.font_Medium(30))
-            head_text.adjustSize()
-            text_header_label.addWidget(head_text)
+        sub_text = QLabel("Магазины")
+        sub_text.setFont(start.font_Regular(14))
+        text_header_label.addWidget(sub_text)
+        self.container_text_header.show()
 
-            sub_text = QLabel("Магазины")
-            sub_text.setFont(start.font_Regular(14))
-            text_header_label.addWidget(sub_text)
-            self.container_text_header.show()
-
-            self.plus_mag_btn = QPushButton("Добавить магазин", self)
-            self.plus_mag_btn.setFixedSize(200, 50)
-            self.plus_mag_btn.setFont(start.font_Medium(12))
-            self.plus_mag_btn.setIcon(QIcon("ProjectImage/mainWin/Plus.svg"))
-            self.plus_mag_btn.setIconSize(QSize(34, 34))
-            self.plus_mag_btn.setStyleSheet(start.base_style_button)
-            self.plus_mag_btn.setStyleSheet("""
-                QPushButton {
-                    border: 1px solid white;
-                    border-radius: 10px;
-                }
-            """)
-            self.plus_mag_btn.move(start.WMax - 250, 125)
-            self.plus_mag_btn.setCursor(Qt.CursorShape(13))
-            self.plus_mag_btn.clicked.connect(self.on_plus_mag_clicked)
-            self.plus_mag_btn.show()
-
-        shop_win()
+        self.plus_mag_btn = QPushButton("Добавить магазин", self)
+        self.plus_mag_btn.setFixedSize(200, 50)
+        self.plus_mag_btn.setFont(start.font_Medium(12))
+        self.plus_mag_btn.setIcon(QIcon("ProjectImage/mainWin/Plus.svg"))
+        self.plus_mag_btn.setIconSize(QSize(34, 34))
+        self.plus_mag_btn.setStyleSheet(start.base_style_button)
+        self.plus_mag_btn.setStyleSheet("""
+            QPushButton {
+                border: 1px solid white;
+                border-radius: 10px;
+            }
+        """)
+        self.plus_mag_btn.move(start.WMax - 250, 125)
+        self.plus_mag_btn.setCursor(Qt.CursorShape(13))
+        self.plus_mag_btn.clicked.connect(self.on_plus_mag_clicked)
+        self.plus_mag_btn.show()
 
         def product_shop():
             print("product_shop")
     def _build_shops_section(self):
+        if hasattr(self, 'container_shop_header') and self.container_shop_header:
+            self.container_shop_header.deleteLater()
+            self.container_shop_header = None
         result = login_user.get_shops_by_user()
         width = [100, 100, 200, 200, 300, 300]
         self.container_shop_header = QWidget(self)
@@ -748,7 +791,7 @@ class MainMenuWindow(QMainWindow):
         self.container_shop_header.show()
 
     def hide_shops_section(self):
-        widgets_to_hide = [
+        widgets_to_remove = [
             'container_shop_header',
             'reload_but_btn',
             'layout_but_2_btn',
@@ -756,9 +799,12 @@ class MainMenuWindow(QMainWindow):
             'container_text_header',
             'plus_mag_btn'
         ]
-        for widget_name in widgets_to_hide:
+        for widget_name in widgets_to_remove:
             if hasattr(self, widget_name) and getattr(self, widget_name):
-                getattr(self, widget_name).hide()
+                widget = getattr(self, widget_name)
+                widget.setParent(None)  # Отсоединяем от родителя
+                widget.deleteLater()  # Планируем удаление
+                setattr(self, widget_name, None)  # Очищаем атрибут
 
     def on_but_shop_click(self, shop_id, shop_name):
         self.current_shop_id = shop_id
@@ -781,6 +827,9 @@ class MainMenuWindow(QMainWindow):
         start.edit_settings("DEFAULT", "layout_main", "4")
     def refresh_shops(self):
         self._build_shops_section()
+
+    def refresh_product(self, shop_id):
+        self._build_products_section(shop_id)
     def on_exit_clicked(self):
         print("click exit_button")
         if os.path.exists("assets/user.json"):
@@ -809,6 +858,23 @@ class MainMenuWindow(QMainWindow):
         print("click reload_but")
 
     def product_shop(self, shop_id, shop_name):
+        self.back_btn = QPushButton("← Назад", self)
+        self.back_btn.setFixedSize(120, 50)
+        self.back_btn.setFont(start.font_Medium(12))
+        self.back_btn.setStyleSheet("""
+            QPushButton {
+                border: none;
+                color: white;
+            }
+            QPushButton:hover {
+                color: #606060;
+            }
+        """)
+        self.back_btn.move(start.WMax - 380, 125)  # Подберите координаты под ваш интерфейс
+        self.back_btn.setCursor(Qt.CursorShape(13))
+        self.back_btn.clicked.connect(self.on_back_btn_clicked)
+        self.back_btn.show()
+
         self.plus_product_btn = QPushButton("Добавить товар", self)
         self.plus_product_btn.setFixedSize(190, 50)
         self.plus_product_btn.setFont(start.font_Medium(12))
@@ -846,6 +912,25 @@ class MainMenuWindow(QMainWindow):
 
         self._build_products_section(shop_id)
 
+    def on_back_btn_clicked(self):
+        if hasattr(self, 'back_btn') and self.back_btn:
+            self.back_btn.deleteLater()
+            self.back_btn = None
+        if hasattr(self, 'plus_product_btn') and self.plus_product_btn:
+            self.plus_product_btn.deleteLater()
+            self.plus_product_btn = None
+        if hasattr(self, 'container_text_header_product') and self.container_text_header_product:
+            self.container_text_header_product.deleteLater()
+            self.container_text_header_product = None
+        if hasattr(self, 'container_products_header') and self.container_products_header:
+            self.container_products_header.deleteLater()
+            self.container_products_header = None
+        self._build_shops_section()
+        self.shop_win()
+
+        if hasattr(self, 'current_shop_id'):
+            del self.current_shop_id
+
     def on_plus_product_btn_clicked(self):
         print("clicked plus_product_btn")
         current_shop_id = self.current_shop_id
@@ -856,16 +941,16 @@ class MainMenuWindow(QMainWindow):
 
     def _build_products_section(self, shop_id):
         result = login_user.get_products_by_shop(shop_id)
+
         products = result["products"]
         if not products:
-            QMessageBox.information(self, "Информация", "В этом магазине нет товаров.")
             return
 
         if hasattr(self, 'container_products_header') and self.container_products_header:
             self.container_products_header.deleteLater()
 
         self.container_products_header = QScrollArea(self)
-        self.container_products_header.setFixedSize(900, 400)
+        self.container_products_header.setFixedSize(900, 470)
         self.container_products_header.move(290, 220)
         self.container_products_header.setWidgetResizable(True)
         self.container_products_header.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
@@ -895,17 +980,38 @@ class MainMenuWindow(QMainWindow):
             """)
             card_layout = QVBoxLayout()
             card_layout.setContentsMargins(15, 15, 15, 15)
-            card_layout.setSpacing(20)
             card_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
             product_card.setLayout(card_layout)
-            if product.get("image"):
-                pixmap = QPixmap(product["image"])
+
+            product_id = product['product_id']
+            image_filename = product.get('image')
+
+            if image_filename:
+                image_path = f"DataBase/ImageProduct/{product_id}/{image_filename}"
+                pixmap = QPixmap(image_path)
+
                 if not pixmap.isNull():
                     label_img = QLabel()
-                    scaled = pixmap.scaled(100, 100, Qt.AspectRatioMode.KeepAspectRatio,
-                                           Qt.TransformationMode.SmoothTransformation)
+                    scaled = pixmap.scaled(
+                        230, 230,
+                        Qt.AspectRatioMode.KeepAspectRatio,
+                        Qt.TransformationMode.SmoothTransformation
+                    )
                     label_img.setPixmap(scaled)
                     label_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+                    # Применяем стили для скругления углов
+                    label_img.setStyleSheet("""
+                        border: 5px solid #fff;
+                        border-radius: 10px;
+                        background-color: white;
+                    """)
+
+                    card_layout.addWidget(label_img)
+                else:
+                    label_img = QLabel("Нет изображения")
+                    label_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                    label_img.setStyleSheet("color: #888;")
                     card_layout.addWidget(label_img)
             else:
                 label_img = QLabel("Нет изображения")
@@ -929,21 +1035,17 @@ class MainMenuWindow(QMainWindow):
             card_layout.addWidget(remains_label)
 
             edit_btn = QPushButton("Редактировать", self)
-            edit_btn.setFont(start.font_Regular(9))
+            edit_btn.setFont(start.font_Medium(10))
             edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
             edit_btn.setFixedHeight(25)
             edit_btn.setStyleSheet("""
 `           QPushButton
-                {
-                    background-color:  #505050;
-                    color: white;
-                    border-radius: 8px;
-                    padding: 3px 10px;
-                }
-            QPushButton: hover
-                {
-                    background-color: #606060;
-                }
+            {
+                background-color: none;
+                color: white;
+                border-radius: 8px;
+                border: none;
+            }
             """)
             edit_btn.clicked.connect(
                 lambda checked, p_id=product['product_id']: self.on_edit_product_clicked(p_id, shop_id)
@@ -954,8 +1056,17 @@ class MainMenuWindow(QMainWindow):
                 current_row.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
                 rows.append(current_row)
 
-            product_card.setFixedWidth(280)
+            # Удаляем фиксированный размер — макет сам рассчитает габариты
+            product_card.setSizePolicy(
+                QSizePolicy.Policy.Preferred,  # Горизонтальный размер
+                QSizePolicy.Policy.Preferred  # Вертикальный размер
+            )
+
+            # Добавляем отступы вокруг card_layout (чтобы содержимое не прилипало к краям)
+            card_layout.setContentsMargins(15, 15, 15, 15)
+
             current_row.addWidget(product_card)
+
         for row in rows:
             widget_count = row.count()
             for _ in range(3 - widget_count):
@@ -1236,6 +1347,16 @@ class AddProduct(QMainWindow):
             print(add_product)
             save_file_with_pathlib(image_save, f"DataBase/ImageProduct/{add_product}/", image)
             QMessageBox.information(self, "Успех", "Товар успешно добавлен!")
+            try:
+                if (self.parent is not None
+                        and hasattr(self.parent, 'refresh_product')
+                        and callable(self.parent.refresh_product)):
+                    self.parent.refresh_product(self.shop_id)
+                else:
+                    print("Родитель не поддерживает refresh_product")
+            except Exception as e:
+                print(f"Ошибка при обновлении родителя: {e}")
+
             self.close()
         else:
             QMessageBox.warning(self, "Ошибка", "Вы заполнили не все поля")
@@ -1349,6 +1470,8 @@ class AddShops(QMainWindow):
                 l = login_user.create_shop_product_table(shop_id)
                 if l == True:
                     QMessageBox.information(self, "Успех", "Магазин успешно добавлен!")
+                    if self.parent and hasattr(self.parent, 'refresh_shops'):
+                        self.parent.refresh_shops()
                     self.close()
                 else:
                     QMessageBox.warning(self, "Ошибка", "Возникла ошибка при добавлении магазина!")
