@@ -12,7 +12,7 @@ import shutil
 from PyQt6.QtGui import QPixmap, QIcon, QTextOption, QPalette, QColor
 from PyQt6.QtWidgets import (QWidget, QPushButton, QApplication, QFrame, QLabel, QLineEdit, QFileDialog, QMessageBox, QVBoxLayout,
                              QMainWindow, QHBoxLayout, QCheckBox, QTextEdit, QSizePolicy, QRadioButton, QScrollArea)
-
+import generate_barcode
 
 
 def generate_shop_id():
@@ -939,8 +939,37 @@ class MainMenuWindow(QMainWindow):
         self.addProductWindow.show()
         self.addProductWindow.raise_()
 
+    def hide_products_section(self):
+        # Удаляем секцию с товарами (если есть)
+        if hasattr(self, 'container_products_header') and self.container_products_header:
+            self.container_products_header.hide()
+            self.container_products_header.deleteLater()
+            self.container_products_header = None
+
+        # Удаляем элементы, созданные в product_shop
+        widgets_to_remove = [
+            'back_btn',
+            'plus_product_btn',
+            'container_text_header_product'
+        ]
+
+        for widget_name in widgets_to_remove:
+            if hasattr(self, widget_name) and getattr(self, widget_name):
+                widget = getattr(self, widget_name)
+                widget.setParent(None)
+                widget.deleteLater()
+                setattr(self, widget_name, None)
+
+        if hasattr(self, 'current_shop_id'):
+            del self.current_shop_id
+
     def _build_products_section(self, shop_id):
         result = login_user.get_products_by_shop(shop_id)
+
+        # Проверка на None
+        if result is None:
+            print(f"Ошибка: не удалось получить данные о товарах для магазина {shop_id}")
+            return
 
         products = result["products"]
         if not products:
@@ -1056,13 +1085,11 @@ class MainMenuWindow(QMainWindow):
                 current_row.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
                 rows.append(current_row)
 
-            # Удаляем фиксированный размер — макет сам рассчитает габариты
             product_card.setSizePolicy(
-                QSizePolicy.Policy.Preferred,  # Горизонтальный размер
-                QSizePolicy.Policy.Preferred  # Вертикальный размер
+                QSizePolicy.Policy.Preferred,
+                QSizePolicy.Policy.Preferred
             )
 
-            # Добавляем отступы вокруг card_layout (чтобы содержимое не прилипало к краям)
             card_layout.setContentsMargins(15, 15, 15, 15)
 
             current_row.addWidget(product_card)
@@ -1107,6 +1134,18 @@ class MainMenuWindow(QMainWindow):
             }
         """)
         self.container_products_header.show()
+
+    def on_edit_product_clicked(self, p_id, shop_id):
+        result = login_user.get_info_product(p_id, shop_id)
+        self.hide_products_section()
+        _build_products_info_section(self, p_id, shop_id, result)
+
+
+def _build_products_info_section(self, p_id, shop_id, result):
+    print(p_id, shop_id, result)
+
+    product_id = p_id
+    image_filename = result[2]  # url_image_product
 
 
 def _refresh_main_window(self):
@@ -1334,14 +1373,29 @@ class AddProduct(QMainWindow):
             return
         image_save = self.selected_image_path
         if name and weight and remains and "Файл не выбран" not in image:
+            barcode = generate_barcode.generate_valid_ean12()
+            id_p = login_user.generate_id()
+            folder_path = f'DataBase/ImageProduct/{id_p}'
+            file_name = 'barcode'
+            output_path = os.path.join(folder_path, file_name)
+            os.makedirs(folder_path, exist_ok=True)
+            ean_code = generate_barcode.generate_ean13(
+                code=barcode,
+                output_path=output_path,
+                format='PNG',
+                background='white',
+                foreground='black'
+            )
+            print(ean_code)
             add_product = login_user.add_product_to_shop(
+                id_product=id_p,
                 name=name,
                 weight=weight,
                 remains=remains,
                 image=image,
                 shop_id=self.shop_id,
                 about=about,
-                barcode=barcode,
+                barcode=ean_code,
                 price=price
             )
             print(add_product)
@@ -1479,5 +1533,4 @@ class AddShops(QMainWindow):
                 QMessageBox.warning(self, "Ошибка", "Пожалуйста, используйте кириллицу!")
         except Exception as e:
             QMessageBox.critical(self, "Ошибка", f"Произошла ошибка: {str(e)}")
-
 

@@ -133,7 +133,7 @@ def create_shop_product_table(shop_id):
 def generate_id():
     return str(uuid.uuid4())[:8]
 
-def add_product_to_shop(name, weight, remains, image, shop_id, about, barcode, price):
+def add_product_to_shop(id_product, name, weight, remains, image, shop_id, about, barcode, price):
     clean_shop_id = re.sub(r'[^a-zA-Z0-9_]', '', shop_id)
     conn = sqlite3.connect('DataBase/Base/ProductShopDataBase.db')
     cursor = conn.cursor()
@@ -151,7 +151,6 @@ def add_product_to_shop(name, weight, remains, image, shop_id, about, barcode, p
         )
         '''
         cursor.execute(create_table_query)
-        id_product = generate_id()
         data = (
             str(id_product),
             str(name),
@@ -234,3 +233,49 @@ def get_products_by_shop(shop_id):
         if conn:
             conn.close()
 
+
+def get_info_product(p_id, shop_id):
+    try:
+        conn = sqlite3.connect("DataBase/Base/ProductShopDataBase.db")
+        cursor = conn.cursor()
+        table_name = f'"{shop_id}"'
+
+        query = f"""
+        SELECT
+            name_product,
+            about_product,
+            url_image_product,
+            price_product,
+            remains_product,
+            weight_product,
+            barcode_product
+        FROM {table_name}
+        WHERE id_product = ?
+        """
+
+        cursor.execute(query, (p_id,))
+        result = cursor.fetchone()
+
+        if result is None:
+            conn.close()
+            return None
+
+        product_info = {
+            "name_product": result[0],
+            "about_product": result[1],
+            "url_image_product": result[2],
+            "price_product": result[3],
+            "remains_product": result[4],
+            "weight_product": result[5],
+            "barcode_product": result[6]
+        }
+
+        conn.close()
+        return product_info
+
+    except sqlite3.Error as e:
+        print(f"Ошибка при работе с БД: {e}")
+        return None
+    except Exception as e:
+        print(f"Неожиданная ошибка: {e}")
+        return None
