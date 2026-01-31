@@ -1140,13 +1140,141 @@ class MainMenuWindow(QMainWindow):
         self.hide_products_section()
         _build_products_info_section(self, p_id, shop_id, result)
 
-
 def _build_products_info_section(self, p_id, shop_id, result):
     print(p_id, shop_id, result)
+    if hasattr(self, 'container_products_info') and self.container_products_info:
+        self.container_products_info.deleteLater()
+        self.container_products_info = None
+
+    self.container_products_info = QWidget(self)
+    self.container_products_info.setFixedSize(870, 500)
+    self.container_products_info.move(290, 80)
+
+    main_layout = QVBoxLayout(self.container_products_info)
+    main_layout.setContentsMargins(20, 20, 20, 20)
+    main_layout.setSpacing(15)
 
     product_id = p_id
-    image_filename = result[2]  # url_image_product
+    image_filename = result['url_image_product']
+    product_name = result['name_product']
+    weight = result['weight_product']
+    remains = result['remains_product']
+    about = result['about_product']
+    price = result['price_product']
 
+    button_layout = QHBoxLayout()
+    button_layout.addStretch(1)
+
+    back_btn = QPushButton("← Назад", self)
+    back_btn.setFixedSize(120, 40)
+    back_btn.setFont(start.font_Medium(11))
+    back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+    back_btn.setStyleSheet("""
+        QPushButton {
+            color: white;
+            border: none;
+            border: 0.5px solid #fff;
+            border-radius: 5px;
+        }
+    """)
+    # back_btn.clicked.connect(self._on_back_from_info)
+    button_layout.addWidget(back_btn)
+    main_layout.addLayout(button_layout)
+
+    title_label = QLabel(f"<b>{product_name}</b>")
+    title_label.setFont(start.font_Medium(18))
+    main_layout.addWidget(title_label)
+
+    content_layout = QHBoxLayout()
+    content_layout.setSpacing(20)
+
+    image_widget = QWidget()
+    image_layout = QVBoxLayout(image_widget)
+    image_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+    if image_filename:
+        image_path = f"DataBase/ImageProduct/{product_id}/{image_filename}"
+        pixmap = QPixmap(image_path)
+
+        if not pixmap.isNull():
+            scaled = pixmap.scaled(
+                300, 300,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
+            )
+            image_label = QLabel()
+            image_label.setPixmap(scaled)
+            image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            image_label.setStyleSheet("""
+                border: 2px solid #e0e0e0;
+                border-radius: 12px;
+                background-color: #fff;
+            """)
+            image_layout.addWidget(image_label)
+        else:
+            no_img_label = QLabel("Изображение не найдено")
+            no_img_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            no_img_label.setStyleSheet("color: #888;")
+            image_layout.addWidget(no_img_label)
+    else:
+        no_img_label = QLabel("Нет изображения")
+        no_img_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        no_img_label.setStyleSheet("color: #888;")
+        image_layout.addWidget(no_img_label)
+
+    content_layout.addWidget(image_widget, 0)
+
+    info_widget = QWidget()
+    info_layout = QVBoxLayout(info_widget)
+    info_layout.setSpacing(10)
+
+    name_info = QLabel(f"<b>Название:</b> {product_name}")
+    name_info.setFont(start.font_Regular(12))
+    info_layout.addWidget(name_info)
+
+    weight_info = QLabel(f"<b>Маркировка:</b> {weight}")
+    weight_info.setFont(start.font_Regular(12))
+    info_layout.addWidget(weight_info)
+
+    remains_info = QLabel(f"<b>Остаток:</b> {remains} шт.")
+    remains_info.setFont(start.font_Regular(12))
+    info_layout.addWidget(remains_info)
+
+    price_info = QLabel(f"<b>Цена:</b> {price} руб.")
+    price_info.setFont(start.font_Regular(12))
+    info_layout.addWidget(price_info)
+
+    about_info = QLabel(f"<b>Описание:</b><br>{about}")
+    about_info.setWordWrap(True)
+    about_info.setFont(start.font_Regular(11))
+    info_layout.addWidget(about_info)
+
+    barcode_label = QLabel()
+    barcode_path = f"DataBase/ImageProduct/{product_id}/barcode.png"
+    barcode_pixmap = QPixmap(barcode_path)
+
+    if not barcode_pixmap.isNull():
+        scaled_barcode = barcode_pixmap.scaled(
+            200, 100,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+        barcode_label.setPixmap(scaled_barcode)
+        barcode_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        barcode_label.setStyleSheet("border: 1px solid #ddd; border-radius: 8px; background-color: white; padding: 5px;")
+
+    info_layout.addWidget(barcode_label)
+
+    content_layout.addWidget(info_widget, 1)
+
+    main_layout.addLayout(content_layout)
+    self.container_products_info.show()
+
+def _on_back_from_info(self):
+    if hasattr(self, 'container_products_info') and self.container_products_info:
+        self.container_products_info.deleteLater()
+        self.container_products_info = None
+    self._build_products_section(self.current_shop_id)
 
 def _refresh_main_window(self):
     central_widget = QWidget()
