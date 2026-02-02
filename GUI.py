@@ -9,6 +9,7 @@ import string
 from PyQt6.QtCore import Qt, QSize
 from pathlib import Path
 import shutil
+from PIL import Image
 from PyQt6.QtGui import QPixmap, QIcon, QTextOption, QPalette, QColor
 from PyQt6.QtWidgets import (QWidget, QPushButton, QApplication, QFrame, QLabel, QLineEdit, QFileDialog, QMessageBox, QVBoxLayout,
                              QMainWindow, QHBoxLayout, QCheckBox, QTextEdit, QSizePolicy, QRadioButton, QScrollArea)
@@ -657,7 +658,6 @@ class MainMenuWindow(QMainWindow):
         self.reload_but_btn.clicked.connect(self.reload_but)
         self.reload_but_btn.show()
 
-        # Кнопка layout_but_2
         self.layout_but_2_btn = QPushButton("", self)
         self.layout_but_2_btn.move(880, 190)
         self.layout_but_2_btn.setFixedSize(QSize(40, 40))
@@ -802,9 +802,9 @@ class MainMenuWindow(QMainWindow):
         for widget_name in widgets_to_remove:
             if hasattr(self, widget_name) and getattr(self, widget_name):
                 widget = getattr(self, widget_name)
-                widget.setParent(None)  # Отсоединяем от родителя
-                widget.deleteLater()  # Планируем удаление
-                setattr(self, widget_name, None)  # Очищаем атрибут
+                widget.setParent(None)
+                widget.deleteLater()
+                setattr(self, widget_name, None)
 
     def on_but_shop_click(self, shop_id, shop_name):
         self.current_shop_id = shop_id
@@ -829,7 +829,7 @@ class MainMenuWindow(QMainWindow):
         self._build_shops_section()
 
     def refresh_product(self, shop_id):
-        self._build_products_section(shop_id)
+        self._build_products_section(shop_id, None)
     def on_exit_clicked(self):
         print("click exit_button")
         if os.path.exists("assets/user.json"):
@@ -858,6 +858,24 @@ class MainMenuWindow(QMainWindow):
         print("click reload_but")
 
     def product_shop(self, shop_id, shop_name):
+        self.search = QLineEdit(self)
+        self.search.setPlaceholderText("Поиск")
+        self.search.setGeometry(850, 180, 275, 40)
+        self.search.setFont(start.font_Medium(28))
+        self.search.setStyleSheet(start.input_style)
+        self.search.show()
+
+        self.search_bt = QPushButton("", self)
+        self.search_bt.setFixedSize(50, 50)
+        self.search_bt.setIcon(QIcon("ProjectImage/mainWin/search.svg"))
+        self.search_bt.setIconSize(QSize(25, 25))
+        self.search_bt.setStyleSheet(start.base_style_button)
+        self.search_bt.move(850 + 285, 180)
+        self.search_bt.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.search_bt.clicked.connect(self.click_on_search)
+        self.search_bt.show()
+
+
         self.back_btn = QPushButton("← Назад", self)
         self.back_btn.setFixedSize(120, 50)
         self.back_btn.setFont(start.font_Medium(12))
@@ -870,7 +888,7 @@ class MainMenuWindow(QMainWindow):
                 color: #606060;
             }
         """)
-        self.back_btn.move(start.WMax - 380, 125)  # Подберите координаты под ваш интерфейс
+        self.back_btn.move(start.WMax - 380, 105)
         self.back_btn.setCursor(Qt.CursorShape(13))
         self.back_btn.clicked.connect(self.on_back_btn_clicked)
         self.back_btn.show()
@@ -886,11 +904,12 @@ class MainMenuWindow(QMainWindow):
                 border-radius: 10px;
             }
         """)
-        self.plus_product_btn.move(start.WMax - 250, 125)
+        self.plus_product_btn.move(start.WMax - 250, 105)
         self.plus_product_btn.setCursor(Qt.CursorShape(13))
         self.plus_product_btn.clicked.connect(self.on_plus_product_btn_clicked)
 
         self.plus_product_btn.show()
+
         self.container_text_header_product = QWidget(self)
         self.container_text_header_product.setFixedSize(400, 85)
         self.container_text_header_product.move(290, 125)
@@ -910,7 +929,7 @@ class MainMenuWindow(QMainWindow):
 
         self.container_text_header_product.show()
 
-        self._build_products_section(shop_id)
+        self._build_products_section(shop_id, None)
 
     def on_back_btn_clicked(self):
         if hasattr(self, 'back_btn') and self.back_btn:
@@ -925,6 +944,9 @@ class MainMenuWindow(QMainWindow):
         if hasattr(self, 'container_products_header') and self.container_products_header:
             self.container_products_header.deleteLater()
             self.container_products_header = None
+        if hasattr(self, 'container_products_header') and self.search:
+            self.search.deleteLater()
+            self.search = None
         self._build_shops_section()
         self.shop_win()
 
@@ -939,14 +961,30 @@ class MainMenuWindow(QMainWindow):
         self.addProductWindow.show()
         self.addProductWindow.raise_()
 
+    def click_on_search(self):
+        text = self.search.text().strip()
+        if not text:
+            find = None
+        else:
+            a = []
+            find = []
+            for i in range(len(text)):
+                a.append(text[i])
+            for i in range(len(text) - 2):
+                find.append(a[i] + a[i + 1] + a[i + 2])
+        print(find)
+        if hasattr(self, 'container_products_header') and self.container_products_header:
+            self.container_products_header.deleteLater()
+            self.container_products_header = None
+
+        self._build_products_section(self.current_shop_id, find)
+
     def hide_products_section(self):
-        # Удаляем секцию с товарами (если есть)
         if hasattr(self, 'container_products_header') and self.container_products_header:
             self.container_products_header.hide()
             self.container_products_header.deleteLater()
             self.container_products_header = None
 
-        # Удаляем элементы, созданные в product_shop
         widgets_to_remove = [
             'back_btn',
             'plus_product_btn',
@@ -963,10 +1001,8 @@ class MainMenuWindow(QMainWindow):
         if hasattr(self, 'current_shop_id'):
             del self.current_shop_id
 
-    def _build_products_section(self, shop_id):
+    def _build_products_section(self, shop_id, search):
         result = login_user.get_products_by_shop(shop_id)
-
-        # Проверка на None
         if result is None:
             print(f"Ошибка: не удалось получить данные о товарах для магазина {shop_id}")
             return
@@ -975,12 +1011,27 @@ class MainMenuWindow(QMainWindow):
         if not products:
             return
 
+        filtered_products = []
+        if search is not None:
+            for product in products:
+                product_name = product['name'].lower()
+                for substr in search:
+                    if substr.lower() in product_name:
+                        filtered_products.append(product)
+                        break
+        else:
+            filtered_products = products
+
+        if not filtered_products:
+            print("Нет товаров, соответствующих запросу")
+            return
+
         if hasattr(self, 'container_products_header') and self.container_products_header:
             self.container_products_header.deleteLater()
 
         self.container_products_header = QScrollArea(self)
-        self.container_products_header.setFixedSize(900, 470)
-        self.container_products_header.move(290, 220)
+        self.container_products_header.setFixedSize(900, 450)
+        self.container_products_header.move(290, 250)
         self.container_products_header.setWidgetResizable(True)
         self.container_products_header.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.container_products_header.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -991,13 +1042,14 @@ class MainMenuWindow(QMainWindow):
                 background-color: transparent;
             }
         """)
+
         scroll_contents = QWidget()
         main_vbox = QVBoxLayout(scroll_contents)
         main_vbox.setContentsMargins(0, 0, 0, 0)
 
         rows = []
 
-        for i, product in enumerate(products):
+        for i, product in enumerate(filtered_products):
             product_card = QWidget()
             product_card.setObjectName("product_card")
             product_card.setStyleSheet("""
@@ -1028,14 +1080,11 @@ class MainMenuWindow(QMainWindow):
                     )
                     label_img.setPixmap(scaled)
                     label_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-                    # Применяем стили для скругления углов
                     label_img.setStyleSheet("""
                         border: 5px solid #fff;
                         border-radius: 10px;
                         background-color: white;
                     """)
-
                     card_layout.addWidget(label_img)
                 else:
                     label_img = QLabel("Нет изображения")
@@ -1068,18 +1117,18 @@ class MainMenuWindow(QMainWindow):
             edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
             edit_btn.setFixedHeight(25)
             edit_btn.setStyleSheet("""
-`           QPushButton
-            {
-                background-color: none;
-                color: white;
-                border-radius: 8px;
-                border: none;
-            }
+                QPushButton {
+                    background-color: none;
+                    color: white;
+                    border-radius: 8px;
+                    border: none;
+                }
             """)
             edit_btn.clicked.connect(
                 lambda checked, p_id=product['product_id']: self.on_edit_product_clicked(p_id, shop_id)
             )
             card_layout.addWidget(edit_btn, alignment=Qt.AlignmentFlag.AlignRight)
+
             if i % 3 == 0:
                 current_row = QHBoxLayout()
                 current_row.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
@@ -1098,8 +1147,10 @@ class MainMenuWindow(QMainWindow):
             widget_count = row.count()
             for _ in range(3 - widget_count):
                 row.addStretch(1)
+
         for row in rows:
             main_vbox.addLayout(row)
+
         self.container_products_header.setWidget(scroll_contents)
 
         self.container_products_header.setStyleSheet("""
@@ -1110,7 +1161,7 @@ class MainMenuWindow(QMainWindow):
             QScrollBar:vertical {
                 border: none;
                 background: none;
-                width: 12px;
+                width: 12            px;
                 margin: 0px 0px 0px 0px;
             }
             QScrollBar::handle:vertical {
@@ -1135,6 +1186,7 @@ class MainMenuWindow(QMainWindow):
         """)
         self.container_products_header.show()
 
+
     def on_edit_product_clicked(self, p_id, shop_id):
         result = login_user.get_info_product(p_id, shop_id)
         self.hide_products_section()
@@ -1147,7 +1199,7 @@ def _build_products_info_section(self, p_id, shop_id, result):
         self.container_products_info = None
 
     self.container_products_info = QWidget(self)
-    self.container_products_info.setFixedSize(870, 500)
+    self.container_products_info.setFixedSize(870, 550)
     self.container_products_info.move(290, 80)
 
     main_layout = QVBoxLayout(self.container_products_info)
@@ -1164,6 +1216,7 @@ def _build_products_info_section(self, p_id, shop_id, result):
 
     button_layout = QHBoxLayout()
     button_layout.addStretch(1)
+
 
     back_btn = QPushButton("← Назад", self)
     back_btn.setFixedSize(120, 40)
@@ -1182,11 +1235,11 @@ def _build_products_info_section(self, p_id, shop_id, result):
     main_layout.addLayout(button_layout)
 
     title_label = QLabel(f"<b>{product_name}</b>")
-    title_label.setFont(start.font_Medium(18))
+    title_label.setFont(start.font_Medium(21))
     main_layout.addWidget(title_label)
 
     content_layout = QHBoxLayout()
-    content_layout.setSpacing(20)
+    content_layout.setSpacing(1)
 
     image_widget = QWidget()
     image_layout = QVBoxLayout(image_widget)
@@ -1206,21 +1259,25 @@ def _build_products_info_section(self, p_id, shop_id, result):
             image_label.setPixmap(scaled)
             image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             image_label.setStyleSheet("""
-                border: 2px solid #e0e0e0;
-                border-radius: 12px;
                 background-color: #fff;
             """)
             image_layout.addWidget(image_label)
-        else:
-            no_img_label = QLabel("Изображение не найдено")
-            no_img_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            no_img_label.setStyleSheet("color: #888;")
-            image_layout.addWidget(no_img_label)
-    else:
-        no_img_label = QLabel("Нет изображения")
-        no_img_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        no_img_label.setStyleSheet("color: #888;")
-        image_layout.addWidget(no_img_label)
+            overlay_widget = QWidget()
+            overlay_widget.setStyleSheet("""
+                        margin-top: 5px;
+                    """)
+            overlay_layout = QVBoxLayout(overlay_widget)
+            overlay_layout.setContentsMargins(0, 8, 2, 2)
+            overlay_layout.setSpacing(6)
+
+            text1 = QLabel(f"{image_filename}")
+            text2 = QLabel(f"{result['barcode_product']}")
+            for label in [text1, text2]:
+                label.setFont(start.font_Blod(9))
+                label.setStyleSheet("color: #757575;")
+                overlay_layout.addWidget(label)
+
+            image_layout.addWidget(overlay_widget)
 
     content_layout.addWidget(image_widget, 0)
 
@@ -1274,7 +1331,7 @@ def _on_back_from_info(self):
     if hasattr(self, 'container_products_info') and self.container_products_info:
         self.container_products_info.deleteLater()
         self.container_products_info = None
-    self._build_products_section(self.current_shop_id)
+    self._build_products_section(self.current_shop_id, None)
 
 def _refresh_main_window(self):
     central_widget = QWidget()
