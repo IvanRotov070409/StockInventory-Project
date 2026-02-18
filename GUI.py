@@ -514,7 +514,6 @@ class MainMenuWindow(QMainWindow):
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation
         )
-
         logo_label = QLabel()
         logo_label.setPixmap(scaled_logo)
         logo_label.setFixedSize(200, 50)
@@ -526,7 +525,6 @@ class MainMenuWindow(QMainWindow):
         button_exit.setIcon(QIcon("ProjectImage/regMainWin/entrance2.svg"))
         button_exit.setIconSize(QSize(22, 22))
         button_exit.setCursor(Qt.CursorShape(13))
-
         button_exit.setStyleSheet("""
             QPushButton {
                 background-color: transparent;
@@ -630,7 +628,6 @@ class MainMenuWindow(QMainWindow):
                 font-weight: 500;
             }
         """)
-        pass
 
     def shop_win(self):
         button_question_main = QPushButton("Есть вопросы?", self)
@@ -763,7 +760,7 @@ class MainMenuWindow(QMainWindow):
             id_but.setFont(start.font_Regular(11))
             id_but.setCursor(Qt.CursorShape.PointingHandCursor)
             id_but.setObjectName(f"{shop['shop_id']}")
-            id_but.setFixedSize(125, 35)
+            id_but.setFixedSize(125, 40)
             id_but.setStyleSheet("""
                 QPushButton {
                     background-color: #fff;
@@ -776,7 +773,27 @@ class MainMenuWindow(QMainWindow):
             """)
             id_but.clicked.connect(lambda checked, shop_id=shop['shop_id'], shop_name=shop['name']: self.on_but_shop_click(shop_id, shop_name))
 
+            id_but_del = QPushButton("", self)
+            id_but_del.setFont(start.font_Regular(11))
+            id_but_del.setCursor(Qt.CursorShape.PointingHandCursor)
+            id_but_del.setIcon(QIcon('ProjectImage/mainWin/del.svg'))
+            id_but_del.setIconSize(QSize(25, 25))
+            id_but_del.setObjectName(f"{shop['shop_id']}")
+            id_but_del.setFixedSize(40, 40)
+            id_but_del.setStyleSheet("""
+                QPushButton {
+                    text-align: center;
+                    border: 2px solid #ff5252;
+                    padding: 10px 15px;
+                    border-radius: 19px;
+                }
+            """)
+            id_but_del.clicked.connect(
+                lambda checked, shop_id=shop['shop_id'], shop_name=shop['name']: self.on_but_shop_del(shop_id,
+                                                                                                        shop_name))
+
             info_layout.addWidget(id_but, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            info_layout.addWidget(id_but_del, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
 
             container_layout.addLayout(info_layout)
 
@@ -806,6 +823,19 @@ class MainMenuWindow(QMainWindow):
                 widget.deleteLater()
                 setattr(self, widget_name, None)
 
+    def on_but_shop_del(self, shop_id, shop_name):
+        msg_box = QMessageBox()
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.setText("Вы уверены, что хотите удалить магазин?")
+        msg_box.setWindowTitle("Оповещение")
+        no_button = msg_box.addButton("Нет", QMessageBox.ButtonRole.NoRole)
+        yes_button = msg_box.addButton("Да", QMessageBox.ButtonRole.YesRole)
+        result = msg_box.exec()
+        if msg_box.clickedButton() == yes_button:
+            login_user.delete_shop_by_id(shop_id)
+            print("Магазин удалён")
+        elif msg_box.clickedButton() == no_button:
+            print("Удаление отменено")
     def on_but_shop_click(self, shop_id, shop_name):
         self.current_shop_id = shop_id
         try:
@@ -1199,7 +1229,7 @@ def _build_products_info_section(self, p_id, shop_id, result):
         self.container_products_info = None
 
     self.container_products_info = QWidget(self)
-    self.container_products_info.setFixedSize(870, 550)
+    self.container_products_info.setFixedSize(900, 550)
     self.container_products_info.move(290, 80)
 
     main_layout = QVBoxLayout(self.container_products_info)

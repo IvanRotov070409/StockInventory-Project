@@ -276,6 +276,20 @@ def get_info_product(p_id, shop_id):
     except sqlite3.Error as e:
         print(f"Ошибка при работе с БД: {e}")
         return None
-    except Exception as e:
-        print(f"Неожиданная ошибка: {e}")
-        return None
+def delete_shop_by_id(shop_id: int) -> bool:
+    register_db_path = "DataBase/Base/RegisterUserDataBase.db"
+    product_db_path = "DataBase/Base/ProductShopDataBase.db"
+
+    with sqlite3.connect(register_db_path) as conn_register:
+        cursor_register = conn_register.cursor()
+        cursor_register.execute("SELECT 1 FROM shop WHERE shop_id = ?",(shop_id,))
+        if cursor_register.fetchone():
+            cursor_register.execute("DELETE FROM shop WHERE shop_id = ?",(shop_id,))
+
+    with sqlite3.connect(product_db_path) as conn_product:
+        cursor_product = conn_product.cursor()
+        cursor_product.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?",(str(shop_id),))
+        if cursor_product.fetchone():
+            cursor_product.execute(f"DROP TABLE IF EXISTS `{shop_id}`")
+            print(f"Таблица {shop_id} удалена из ProductShopDataBase.db")
+        return True
