@@ -5,6 +5,7 @@ import start
 import webbrowser
 import login_user
 import random
+import subprocess
 import string
 from PyQt6.QtCore import Qt, QSize
 from pathlib import Path
@@ -12,7 +13,7 @@ import shutil
 from PIL import Image
 from PyQt6.QtGui import QPixmap, QIcon, QTextOption, QPalette, QColor
 from PyQt6.QtWidgets import (QWidget, QPushButton, QApplication, QFrame, QLabel, QLineEdit, QFileDialog, QMessageBox, QVBoxLayout,
-                             QMainWindow, QHBoxLayout, QCheckBox, QTextEdit, QSizePolicy, QRadioButton, QScrollArea)
+                             QMainWindow, QHBoxLayout, QCheckBox, QTextEdit, QSizePolicy, QRadioButton, QScrollArea, QListWidget)
 import generate_barcode
 
 
@@ -146,7 +147,8 @@ class MainWindow(QWidget):
 
     def on_button_question_clicked(self):
         url = "192.168.00.00"
-        webbrowser.open(url)
+        os.startfile(r'C:\Users\Thunder\PycharmProjects\StockInventory-Project\SiteProgram\main.html')
+        # webbrowser.open(url)
         print(f"click button_question"
               f"\nCONNECT: {url}")
 
@@ -492,12 +494,44 @@ class MainMenuWindow(QMainWindow):
         self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
         self.Main()
         self.show()
+
     def setWhiteTheme(self):
         self.setPalette(QApplication.instance().palette())
+
     def Main(self):
         self._build_shops_section()
         self.fix_info()
         self.shop_win()
+
+    def refresh_shops_list(self):
+        self.list_widget.clear()
+        shops_data = login_user.get_shops_by_user()
+        if shops_data and shops_data["shops"]:
+            for shop in shops_data["shops"]:
+                self.list_widget.addItem(shop["name"])
+        else:
+            self.list_widget.addItem("У вас нет магазинов")
+
+    def load_shops_on_startup(self):
+        try:
+            shops_data = login_user.get_shops_by_user()
+            self.list_widget.clear()
+
+            if not shops_data or "shops" not in shops_data:
+                self.list_widget.addItem("У вас нет магазинов")
+                return
+
+            shops = shops_data["shops"]
+            if not shops:
+                self.list_widget.addItem("У вас нет магазинов")
+            else:
+                for shop in shops:
+                    if "name" in shop:
+                        self.list_widget.addItem(shop["name"])
+        except Exception as e:
+            print(f"Ошибка загрузки магазинов: {e}")
+            self.list_widget.addItem("Ошибка загрузки магазинов")
+
     def fix_info(self):
         head_left = QWidget(self)
         head_left.setGeometry(0, 0, 270, 750)
@@ -519,21 +553,61 @@ class MainMenuWindow(QMainWindow):
         logo_label.setFixedSize(200, 50)
         layout.addWidget(logo_label, alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
 
-        button_exit = QPushButton("   Выход")
+        self.shops_label = QLabel("Магазины:")
+        self.shops_label.setStyleSheet("""
+            QLabel {
+                color: white;
+                font-weight: bold;
+                font-size: 16px;
+                padding: 5px 0px;
+            }
+        """)
+        layout.addWidget(self.shops_label)
+        self.list_widget = QListWidget()
+        self.list_widget.setCursor(Qt.CursorShape(13))
+        self.list_widget.setStyleSheet("""
+            QListWidget {
+                background-color: transparent;
+                color: #cccccc;
+                font-size: 14px;
+                border: none;
+                outline: none;
+            }
+            QListWidget::item:hover{
+                background-color: #383838;
+            }
+            QListWidget::item {
+                padding: 5px 16px;
+                text-align: center;
+                border: none;
+                margin: 0;
+                background: none;
+            }
+            QListWidget::item:selected {
+                color: white;
+                border: none;
+            }
+        """)
+
+        layout.addWidget(self.list_widget)
+        self.load_shops_on_startup()
+
+        button_exit = QPushButton("   Выход", self)
         button_exit.setFont(start.font_Medium(12))
         button_exit.setFixedSize(150, 100)
         button_exit.setIcon(QIcon("ProjectImage/regMainWin/entrance2.svg"))
         button_exit.setIconSize(QSize(22, 22))
         button_exit.setCursor(Qt.CursorShape(13))
+        button_exit.move(50, 600)
         button_exit.setStyleSheet("""
             QPushButton {
                 background-color: transparent;
                 border: none;
                 font-weight: 500;
-                padding-left: 10px;
             }
         """)
-        layout.addWidget(button_exit, alignment=Qt.AlignmentFlag.AlignLeft)
+        button_exit.show()
+        button_exit.clicked.connect(self.on_exit_clicked)
 
         head_left.setStyleSheet("""
             QWidget {
@@ -628,6 +702,7 @@ class MainMenuWindow(QMainWindow):
                 font-weight: 500;
             }
         """)
+        help_button.clicked.connect(self.on_button_question_main_clicked)
 
     def shop_win(self):
         button_question_main = QPushButton("Есть вопросы?", self)
@@ -648,32 +723,14 @@ class MainMenuWindow(QMainWindow):
         self.reload_but_btn.setCursor(Qt.CursorShape(13))
         self.reload_but_btn.setStyleSheet("""
             QPushButton {
-                border-radius: 15px;
-                background-color: #242424;
+                border-radius: 20px;
+            }
+            QPushButton:hover {
+                background-color: #4d4d4d;
             }
         """)
         self.reload_but_btn.clicked.connect(self.reload_but)
         self.reload_but_btn.show()
-
-        self.layout_but_2_btn = QPushButton("", self)
-        self.layout_but_2_btn.move(880, 190)
-        self.layout_but_2_btn.setFixedSize(QSize(40, 40))
-        self.layout_but_2_btn.setIcon(QIcon("ProjectImage/mainWin/layout_but_2.svg"))
-        self.layout_but_2_btn.setIconSize(QSize(26, 26))
-        self.layout_but_2_btn.setCursor(Qt.CursorShape(13))
-        self.layout_but_2_btn.setStyleSheet(start.base_style_button)
-        self.layout_but_2_btn.clicked.connect(self.on_button_layout2_main_clicked)
-        self.layout_but_2_btn.show()
-
-        self.layout_but_4_btn = QPushButton("", self)
-        self.layout_but_4_btn.move(940, 190)
-        self.layout_but_4_btn.setFixedSize(QSize(40, 40))
-        self.layout_but_4_btn.setIcon(QIcon("ProjectImage/mainWin/layout_but_4.svg"))
-        self.layout_but_4_btn.setIconSize(QSize(26, 26))
-        self.layout_but_4_btn.setCursor(Qt.CursorShape(13))
-        self.layout_but_4_btn.setStyleSheet(start.base_style_button)
-        self.layout_but_4_btn.clicked.connect(self.on_button_layout4_main_clicked)
-        self.layout_but_4_btn.show()
 
         self.container_text_header = QWidget(self)
         self.container_text_header.setFixedSize(200, 125)
@@ -833,6 +890,9 @@ class MainMenuWindow(QMainWindow):
         result = msg_box.exec()
         if msg_box.clickedButton() == yes_button:
             login_user.delete_shop_by_id(shop_id)
+            QMessageBox.information(self, "Успех", "Магазин успешно удален!")
+            self.load_shops_on_startup()
+            self._build_shops_section()
             print("Магазин удалён")
         elif msg_box.clickedButton() == no_button:
             print("Удаление отменено")
@@ -874,11 +934,12 @@ class MainMenuWindow(QMainWindow):
         print("click settings_button")
 
     def on_button_question_main_clicked(self):
+        os.startfile(r'C:\Users\Thunder\PycharmProjects\StockInventory-Project\SiteProgram\main.html')
         print("click button_question_main")
 
     def on_plus_mag_clicked(self):
         if self.addShopsWindow is None or not self.addShopsWindow.isVisible():
-            self.addShopsWindow = AddShops(parent=self)
+            self.addShopsWindow = AddShops(parent=self, main_window=self)
         self.addShopsWindow.show()
         self.addShopsWindow.raise_()
         print("click plus_mag")
@@ -965,6 +1026,12 @@ class MainMenuWindow(QMainWindow):
         if hasattr(self, 'back_btn') and self.back_btn:
             self.back_btn.deleteLater()
             self.back_btn = None
+        if hasattr(self, 'search') and self.search:
+            self.search.deleteLater()
+            self.search = None
+        if hasattr(self, 'search_bt') and self.search_bt:
+            self.search_bt.deleteLater()
+            self.search_bt = None
         if hasattr(self, 'plus_product_btn') and self.plus_product_btn:
             self.plus_product_btn.deleteLater()
             self.plus_product_btn = None
@@ -996,10 +1063,8 @@ class MainMenuWindow(QMainWindow):
         if not text:
             find = None
         else:
-            a = []
+            a = list(text)
             find = []
-            for i in range(len(text)):
-                a.append(text[i])
             for i in range(len(text) - 2):
                 find.append(a[i] + a[i + 1] + a[i + 2])
         print(find)
@@ -1033,24 +1098,24 @@ class MainMenuWindow(QMainWindow):
 
     def _build_products_section(self, shop_id, search):
         result = login_user.get_products_by_shop(shop_id)
-        if result is None:
-            print(f"Ошибка: не удалось получить данные о товарах для магазина {shop_id}")
-            return
-
         products = result["products"]
         if not products:
             return
 
         filtered_products = []
-        if search is not None:
-            for product in products:
-                product_name = product['name'].lower()
-                for substr in search:
-                    if substr.lower() in product_name:
-                        filtered_products.append(product)
-                        break
-        else:
+
+        if search is None:
             filtered_products = products
+        else:
+            if len(search) == 0:
+                filtered_products = products
+            else:
+                for product in products:
+                    product_name = product['name'].lower()
+                    for substr in search:
+                        if substr.lower() in product_name:
+                            filtered_products.append(product)
+                            break
 
         if not filtered_products:
             print("Нет товаров, соответствующих запросу")
@@ -1222,6 +1287,75 @@ class MainMenuWindow(QMainWindow):
         self.hide_products_section()
         _build_products_info_section(self, p_id, shop_id, result)
 
+    def _back_to_shops_page(self, shop_id, search, shop_name):
+        for widget_attr in [
+            'container_products_info',
+            'search',
+            'search_bt',
+            'plus_product_btn',
+            'container_text_header_product',
+            'back_btn_product'
+        ]:
+            widget = getattr(self, widget_attr, None)
+            if widget:
+                widget.setParent(None)
+                widget.deleteLater()
+                setattr(self, widget_attr, None)
+        print(shop_id, search)
+        self._build_products_section(shop_id, search)
+        self.product_shop(shop_id, shop_name)
+
+        if hasattr(self, 'delete_product') and self.delete_product:
+            self.delete_product.setParent(None)
+            self.delete_product.deleteLater()
+            self.delete_product = None
+
+        if hasattr(self, 'back_btn_product') and self.back_btn_product:
+            self.back_btn_product.setParent(None)
+            self.back_btn_product.deleteLater()
+            self.back_btn_product = None
+        if hasattr(self, 'current_shop_id'):
+            del self.current_shop_id
+
+    def open_change_remains_window(self, shop_id, id_product):
+        self.change_remains_window = ChangeRemainsWindow(shop_id, id_product,  parent=self)
+        self.change_remains_window.show()
+
+    def _del_product(self, shop_id, search, shop_name, id_product):
+        for widget_attr in [
+            'container_products_info',
+            'search',
+            'search_bt',
+            'plus_product_btn',
+            'container_text_header_product',
+            'back_btn_product'
+        ]:
+            widget = getattr(self, widget_attr, None)
+            if widget:
+                widget.setParent(None)
+                widget.deleteLater()
+                setattr(self, widget_attr, None)
+        print(shop_id, search)
+        delite = login_user.delete_product_from_shop(id_product, shop_id)
+        self._build_products_section(shop_id, search)
+        self.product_shop(shop_id, shop_name)
+
+        if hasattr(self, 'delete_product') and self.delete_product:
+            self.delete_product.setParent(None)
+            self.delete_product.deleteLater()
+            self.delete_product = None
+
+        if hasattr(self, 'back_btn_product') and self.back_btn_product:
+            self.back_btn_product.setParent(None)
+            self.back_btn_product.deleteLater()
+            self.back_btn_product = None
+        if hasattr(self, 'current_shop_id'):
+            del self.current_shop_id
+
+        if delite == True:
+            QMessageBox.information(self, "Успех", "Товар удален!")
+        else:
+            QMessageBox.information(self, "Ошибка", "Случилась ошибка")
 def _build_products_info_section(self, p_id, shop_id, result):
     print(p_id, shop_id, result)
     if hasattr(self, 'container_products_info') and self.container_products_info:
@@ -1247,12 +1381,29 @@ def _build_products_info_section(self, p_id, shop_id, result):
     button_layout = QHBoxLayout()
     button_layout.addStretch(1)
 
+    self.delete_product = QPushButton("Удалить товар", self)
+    self.delete_product.move(start.WMax - 330, 125)
+    self.delete_product.setFixedSize(150, 40)
+    self.delete_product.setFont(start.font_Medium(11))
+    self.delete_product.setCursor(Qt.CursorShape.PointingHandCursor)
+    self.delete_product.setStyleSheet("""
+        QPushButton {
+            color: #ff5252;
+            border: none;
+            border: 0.5px solid #ff5252;
+            border-radius: 5px;
+        }
+    """)
+    self.delete_product.clicked.connect(
+        lambda: self._del_product(shop_id, "", login_user.get_shop_name_by_id(shop_id), p_id))
+    self.delete_product.show()
 
-    back_btn = QPushButton("← Назад", self)
-    back_btn.setFixedSize(120, 40)
-    back_btn.setFont(start.font_Medium(11))
-    back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-    back_btn.setStyleSheet("""
+    self.back_btn_product = QPushButton("← Назад", self)
+    self.back_btn_product.move(start.WMax - 160, 125)
+    self.back_btn_product.setFixedSize(120, 40)
+    self.back_btn_product.setFont(start.font_Medium(11))
+    self.back_btn_product.setCursor(Qt.CursorShape.PointingHandCursor)
+    self.back_btn_product.setStyleSheet("""
         QPushButton {
             color: white;
             border: none;
@@ -1260,13 +1411,16 @@ def _build_products_info_section(self, p_id, shop_id, result):
             border-radius: 5px;
         }
     """)
-    # back_btn.clicked.connect(self._on_back_from_info)
-    button_layout.addWidget(back_btn)
+    self.back_btn_product.clicked.connect(lambda: self._back_to_shops_page(shop_id, "", login_user.get_shop_name_by_id(shop_id)))
+    self.back_btn_product.show()
+
     main_layout.addLayout(button_layout)
+
 
     title_label = QLabel(f"<b>{product_name}</b>")
     title_label.setFont(start.font_Medium(21))
     main_layout.addWidget(title_label)
+
 
     content_layout = QHBoxLayout()
     content_layout.setSpacing(1)
@@ -1325,9 +1479,26 @@ def _build_products_info_section(self, p_id, shop_id, result):
 
     remains_info = QLabel(f"<b>Остаток:</b> {remains} шт.")
     remains_info.setFont(start.font_Regular(12))
-    info_layout.addWidget(remains_info)
+    remains_but = QPushButton("Изменить", self)
+    remains_but.setFont(start.font_Regular(10))
+    remains_but.setCursor(Qt.CursorShape.PointingHandCursor)
+    remains_but.setStyleSheet("""
+        QPushButton {
+            font-style: italic;
+            text-decoration: underline;
+            border: none;
+        }
+    """)
+    remains_but.clicked.connect(lambda: self.open_change_remains_window(shop_id, product_id))
 
-    price_info = QLabel(f"<b>Цена:</b> {price} руб.")
+    h_layout = QHBoxLayout()
+    h_layout.addWidget(remains_info)
+    h_layout.addSpacing(300)
+    h_layout.addWidget(remains_but)
+
+    info_layout.addLayout(h_layout)
+
+    price_info = QLabel(f"<b>Цена:</b> {price}")
     price_info.setFont(start.font_Regular(12))
     info_layout.addWidget(price_info)
 
@@ -1357,11 +1528,9 @@ def _build_products_info_section(self, p_id, shop_id, result):
     main_layout.addLayout(content_layout)
     self.container_products_info.show()
 
-def _on_back_from_info(self):
-    if hasattr(self, 'container_products_info') and self.container_products_info:
-        self.container_products_info.deleteLater()
-        self.container_products_info = None
-    self._build_products_section(self.current_shop_id, None)
+
+def _on_back_from_info(self, current_shop_id):
+    print(current_shop_id)
 
 def _refresh_main_window(self):
     central_widget = QWidget()
@@ -1661,8 +1830,9 @@ def save_file_with_pathlib(source_path, target_dir, target_name=None):
     print(f"Файл сохранён: {target}")
     return str(target)
 class AddShops(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, main_window=None):
         super().__init__(parent)
+        self.main_window = main_window
         self.parent = parent
         self.setWhiteTheme()
         self.setWindowTitle("Добавить магазин")
@@ -1739,6 +1909,7 @@ class AddShops(QMainWindow):
                 l = login_user.create_shop_product_table(shop_id)
                 if l == True:
                     QMessageBox.information(self, "Успех", "Магазин успешно добавлен!")
+                    self.main_window.load_shops_on_startup()
                     if self.parent and hasattr(self.parent, 'refresh_shops'):
                         self.parent.refresh_shops()
                     self.close()
@@ -1749,3 +1920,79 @@ class AddShops(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Ошибка", f"Произошла ошибка: {str(e)}")
 
+from PyQt6.QtWidgets import QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox
+
+class ChangeRemainsWindow(QMainWindow):
+    def __init__(self, shop_id, id_product, parent=None):
+        super().__init__(parent)
+        self.shop_id = shop_id
+        self.id_product = id_product
+        self.setWhiteTheme()
+        self.setWindowTitle("Изменить остаток")
+        self.resize(550, 400)
+        self.setMinimumSize(550, 300)
+        self.setMaximumSize(550, 400)
+        self.setStyleSheet("background-color: #1C1C1C; color: white;")
+
+        central_widget = QWidget(self)
+        self.setCentralWidget(central_widget)
+        layout = QVBoxLayout(central_widget)
+
+        self._setup_ui(layout)
+
+    def setWhiteTheme(self):
+        self.setPalette(QApplication.instance().palette())
+
+    def _setup_ui(self, layout):
+        head_text_entrance = QLabel("Изменить остаток", self)
+        head_text_entrance.setFont(start.font_Medium(28))
+        head_text_entrance.adjustSize()
+        head_text_entrance.move(115, 50)
+
+        self.sub_text_entrance = QLabel("Введите кол-во оставшихся\nтоваров: ", self)
+        self.sub_text_entrance.setFont(start.font_Regular(12))
+        self.sub_text_entrance.adjustSize()
+        self.sub_text_entrance.move(115, 120)
+
+        login_warn_text = QLabel("Пожалуйста, введите только цифру", self)
+        login_warn_text.setFont(start.font_Regular(10))
+        login_warn_text.move(115, 250)
+        login_warn_text.adjustSize()
+        login_warn_text.setStyleSheet("color: rgba(255, 255, 255, 0.5);")
+
+        self.login_input_entrance = QLineEdit(self)
+        self.login_input_entrance.setPlaceholderText("Новый остаток")
+        self.login_input_entrance.setGeometry(115, 190, 310, 50)
+        self.login_input_entrance.setFont(start.font_Medium(28))
+        self.login_input_entrance.setStyleSheet(start.input_style)
+
+        self.button_entrance = QPushButton("Изменить", self)
+        self.button_entrance.setFont(start.font_Regular(12))
+        self.button_entrance.setGeometry(170, 315, 200, 40)
+        self.button_entrance.setFont(start.font_Regular(12))
+        self.button_entrance.setCursor(Qt.CursorShape(13))
+        self.button_entrance.setStyleSheet("""
+                                    QPushButton {
+                                        background-color: #fff;
+                                        color: rgb(15,15,15);
+                                        text-align: center;
+                                        border: none;
+                                        padding: 10px 15px;
+                                        border-radius: 20px;
+                                    }
+                                """)
+        self.button_entrance.clicked.connect(lambda: self.on_change_clicked(self.id_product, self.shop_id))
+
+    def on_change_clicked(self, id_product, shop_id):
+        new_remains = self.login_input_entrance.text().strip()
+        if not new_remains.isdigit():
+            QMessageBox.warning(self, "Ошибка", "Пожалуйста, введите число")
+            return
+        print(f"Новый остаток для магазина {shop_id}: {new_remains}")
+        success = login_user.update_shop_product_remains(int(new_remains), id_product, shop_id)
+        if success:
+            result = login_user.get_info_product(id_product, shop_id)
+            self.close()
+            _build_products_info_section(self, id_product, shop_id, result)
+        else:
+            QMessageBox.warning(self, "Ошибка", "Не удалось изменить остаток")

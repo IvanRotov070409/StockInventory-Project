@@ -293,3 +293,65 @@ def delete_shop_by_id(shop_id: int) -> bool:
             cursor_product.execute(f"DROP TABLE IF EXISTS `{shop_id}`")
             print(f"Таблица {shop_id} удалена из ProductShopDataBase.db")
         return True
+
+def delete_product_from_shop(id_product, shop_id):
+    db_path = "DataBase/Base/ProductShopDataBase.db"
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (shop_id,))
+        if not cursor.fetchone():
+            print(f"Таблица '{shop_id}' не найдена в базе данных.")
+            return
+        safe_shop_id = f'"{shop_id}"'
+        delete_query = f"DELETE FROM {safe_shop_id} WHERE id_product = ?"
+        cursor.execute(delete_query, (id_product,))
+        conn.commit()
+
+        if cursor.rowcount > 0:
+            return True
+        else:
+            return False
+
+    except sqlite3.Error as e:
+        print(f"Ошибка базы данных: {e}")
+    finally:
+        if conn:
+            conn.close()
+
+def get_shop_name_by_id(shop_id):
+    db_path = "DataBase/Base/RegisterUserDataBase.db"
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM shop WHERE shop_id = ?", (shop_id,))
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        else:
+            print(f"Не найдена строка с shop_id={shop_id} в таблице 'shop'.")
+            return None
+
+    except sqlite3.Error as e:
+        print(f"Ошибка базы данных: {e}")
+        return None
+    finally:
+        if conn:
+            conn.close()
+
+def update_shop_product_remains(new_remains, id_product, shop_id):
+    db_path = "DataBase/Base/ProductShopDataBase.db"
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    sql = f"""
+    UPDATE "{shop_id}"
+    SET remains_product = ?
+    WHERE id_product = ?
+    """
+    cursor.execute(sql, (new_remains, id_product))
+    conn.commit()
+
+    if cursor.rowcount == 0:
+        print("Не найдено совпадений для обновления.")
+        return False
+    return True

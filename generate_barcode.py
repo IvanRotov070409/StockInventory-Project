@@ -67,10 +67,10 @@ def generate_valid_ean12():
 
 code_12 = generate_valid_ean12()
 
-filename = generate_ean13(
-    code=code_12,
-    output_path='barcode_test',
-    format='PNG',
-    background='white',
-    foreground='black'
-)
+# filename = generate_ean13(
+#     code=code_12,
+#     output_path='barcode_test',
+#     format='PNG',
+#     background='white',
+#     foreground='black'
+# )
