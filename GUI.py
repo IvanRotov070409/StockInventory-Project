@@ -2,21 +2,16 @@ import os
 import re
 import json
 import start
-import webbrowser
 import login_user
 import random
-import subprocess
 import string
 from PyQt6.QtCore import Qt, QSize
 from pathlib import Path
 import shutil
-from PIL import Image
-from PyQt6.QtGui import QPixmap, QIcon, QTextOption, QPalette, QColor
-from PyQt6.QtWidgets import (QWidget, QPushButton, QApplication, QFrame, QLabel, QLineEdit, QFileDialog, QMessageBox, QVBoxLayout,
+from PyQt6.QtGui import QPixmap, QIcon, QPalette, QColor
+from PyQt6.QtWidgets import (QWidget, QApplication, QFrame, QFileDialog,
                              QMainWindow, QHBoxLayout, QCheckBox, QTextEdit, QSizePolicy, QRadioButton, QScrollArea, QListWidget)
 import generate_barcode
-
-
 def generate_shop_id():
     digits = ''.join(random.choices(string.digits, k=5))
     letters = ''.join(random.choices(string.ascii_lowercase, k=10))
@@ -172,6 +167,7 @@ class RegWindow(QWidget):
         self.main_window = main_window
         self.setWhiteTheme()
         self.setWindowTitle("Регистрация")
+        self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
         self.setGeometry(500, 110, start.WMaxReg, start.HMaxReg)
         self.setStyleSheet("background-color: #1C1C1C;")
         self.setFixedSize(start.WMaxReg, start.HMaxReg)
@@ -337,6 +333,7 @@ class EntranceWindow(QWidget):
         self.setWindowTitle("Вход")
         self.setGeometry(500, 110, start.WMaxReg, start.HMaxReg)
         self.setStyleSheet("background-color: #1C1C1C;")
+        self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
         self.setFixedSize(start.WMaxReg, start.HMaxReg)
         self.entranceWindowLabel()
         self.show()
@@ -489,9 +486,9 @@ class MainMenuWindow(QMainWindow):
         self.setWhiteTheme()
         self.setWindowTitle("StockBalance - Инвентаризация склада магазинов")
         self.setGeometry(175, 75, start.WMax, start.HMax)
+        self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
         self.setStyleSheet("background-color: #1C1C1C;")
         self.setFixedSize(start.WMax, start.HMax)
-        self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
         self.Main()
         self.show()
 
@@ -1551,6 +1548,7 @@ class AddProduct(QMainWindow):
         self.resize(1000, 660)
         self.setFixedSize(1000, 660)
         self.setStyleSheet("background-color: #1C1C1C; color: white;")
+        self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
@@ -1840,7 +1838,7 @@ class AddShops(QMainWindow):
         self.setMinimumSize(550, 300)
         self.setMaximumSize(550, 400)
         self.setStyleSheet("background-color: #1C1C1C; color: white;")
-
+        self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
@@ -1933,7 +1931,7 @@ class ChangeRemainsWindow(QMainWindow):
         self.setMinimumSize(550, 300)
         self.setMaximumSize(550, 400)
         self.setStyleSheet("background-color: #1C1C1C; color: white;")
-
+        self.setWindowIcon(QIcon("ProjectImage/regMainWin/Logo_window.png"))
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
