@@ -8,6 +8,7 @@ import string
 from PyQt6.QtCore import Qt, QSize
 from pathlib import Path
 import shutil
+from PyQt6.QtWidgets import QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox
 from PyQt6.QtGui import QPixmap, QIcon, QPalette, QColor
 from PyQt6.QtWidgets import (QWidget, QApplication, QFrame, QFileDialog,
                              QMainWindow, QHBoxLayout, QCheckBox, QTextEdit, QSizePolicy, QRadioButton, QScrollArea, QListWidget)
@@ -266,6 +267,21 @@ class RegWindow(QWidget):
                 msg_box = QMessageBox()
                 msg_box.setIcon(QMessageBox.Icon.Critical)
                 msg_box.setText("Пароль или почта не должен содержать кириллицу")
+                msg_box.setStyleSheet("""
+                    QMessageBox {
+                        background-color: #1C1C1C;
+                        color: white;
+                    }
+                    QMessageBox QLabel {
+                        color: white;
+                    }
+                    QMessageBox QPushButton {
+                        background-color: #333333;
+                        color: white;
+                        border: 1px solid #555555;
+                        padding: 5px 15px;
+                    }
+                """)
                 msg_box.setWindowTitle("Оповещение")
                 msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
 
@@ -281,8 +297,38 @@ class RegWindow(QWidget):
                     print(f"USER: {login} IS REGISTER\n")
                     start.assetsPathAppend()
                     msg_box = QMessageBox()
+                    msg_box.setStyleSheet("""
+                        QMessageBox {
+                            background-color: #1C1C1C;
+                            color: white;
+                        }
+                        QMessageBox QLabel {
+                            color: white;
+                        }
+                        QMessageBox QPushButton {
+                            background-color: #333333;
+                            color: white;
+                            border: 1px solid #555555;
+                            padding: 5px 15px;
+                        }
+                    """)
                     msg_box.setIcon(QMessageBox.Icon.Information)
                     msg_box.setText("Регистрация прошла успешно")
+                    msg_box.setStyleSheet("""
+                        QMessageBox {
+                            background-color: #1C1C1C;
+                            color: white;
+                        }
+                        QMessageBox QLabel {
+                            color: white;
+                        }
+                        QMessageBox QPushButton {
+                            background-color: #333333;
+                            color: white;
+                            border: 1px solid #555555;
+                            padding: 5px 15px;
+                        }
+                    """)
                     start.create_settings()
                     msg_box.setWindowTitle("Оповещение")
                     msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
@@ -308,6 +354,21 @@ class RegWindow(QWidget):
                 else:
                     print(f"USER: {login} IS NOT REGISTER\n")
                     msg_box = QMessageBox()
+                    msg_box.setStyleSheet("""
+                        QMessageBox {
+                            background-color: #1C1C1C;
+                            color: white;
+                        }
+                        QMessageBox QLabel {
+                            color: white;
+                        }
+                        QMessageBox QPushButton {
+                            background-color: #333333;
+                            color: white;
+                            border: 1px solid #555555;
+                            padding: 5px 15px;
+                        }
+                    """)
                     msg_box.setIcon(QMessageBox.Icon.Critical)
                     msg_box.setText("Пользователь уже существует")
                     msg_box.setWindowTitle("Оповещение")
@@ -316,6 +377,21 @@ class RegWindow(QWidget):
         else:
             print("ERROR: incorrect data entry")
             msg_box = QMessageBox()
+            msg_box.setStyleSheet("""
+                QMessageBox {
+                    background-color: #1C1C1C;
+                    color: white;
+                }
+                QMessageBox QLabel {
+                    color: white;
+                }
+                QMessageBox QPushButton {
+                    background-color: #333333;
+                    color: white;
+                    border: 1px solid #555555;
+                    padding: 5px 15px;
+                }
+            """)
             msg_box.setIcon(QMessageBox.Icon.Warning)
             msg_box.setText("Неверно указаны данные или пароль")
             msg_box.setWindowTitle("Ошибка")
@@ -405,6 +481,21 @@ class EntranceWindow(QWidget):
         if login_user.loginUserDB(login, password) == True:
             print(f"USER: {login} IS ENTRANCE")
             msg_box = QMessageBox()
+            msg_box.setStyleSheet("""
+                QMessageBox {
+                    background-color: #1C1C1C;
+                    color: white;
+                }
+                QMessageBox QLabel {
+                    color: white;
+                }
+                QMessageBox QPushButton {
+                    background-color: #333333;
+                    color: white;
+                    border: 1px solid #555555;
+                    padding: 5px 15px;
+                }
+            """)
             msg_box.setIcon(QMessageBox.Icon.Information)
             msg_box.setText("Успешный вход")
             start.create_settings()
@@ -431,6 +522,21 @@ class EntranceWindow(QWidget):
             msg_box = QMessageBox()
             msg_box.setIcon(QMessageBox.Icon.Warning)
             msg_box.setText("Пользователь не найден")
+            msg_box.setStyleSheet("""
+                QMessageBox {
+                    background-color: #1C1C1C;
+                    color: white;
+                }
+                QMessageBox QLabel {
+                    color: white;
+                }
+                QMessageBox QPushButton {
+                    background-color: #333333;
+                    color: white;
+                    border: 1px solid #555555;
+                    padding: 5px 15px;
+                }
+            """)
             msg_box.setWindowTitle("Ошибка")
             msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
             msg_box.exec()
@@ -880,6 +986,21 @@ class MainMenuWindow(QMainWindow):
     def on_but_shop_del(self, shop_id, shop_name):
         msg_box = QMessageBox()
         msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.setStyleSheet("""
+            QMessageBox {
+                background-color: #1C1C1C;
+                color: white;
+            }
+            QMessageBox QLabel {
+                color: white;
+            }
+            QMessageBox QPushButton {
+                background-color: #333333;
+                color: white;
+                border: 1px solid #555555;
+                padding: 5px 15px;
+            }
+        """)
         msg_box.setText("Вы уверены, что хотите удалить магазин?")
         msg_box.setWindowTitle("Оповещение")
         no_button = msg_box.addButton("Нет", QMessageBox.ButtonRole.NoRole)
@@ -1918,7 +2039,6 @@ class AddShops(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Ошибка", f"Произошла ошибка: {str(e)}")
 
-from PyQt6.QtWidgets import QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox
 
 class ChangeRemainsWindow(QMainWindow):
     def __init__(self, shop_id, id_product, parent=None):
